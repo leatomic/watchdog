@@ -1,0 +1,4 @@
+dependencies {
+    api project(':watchdog-core')
+    api 'org.springframework.session:spring-session-core'
+}

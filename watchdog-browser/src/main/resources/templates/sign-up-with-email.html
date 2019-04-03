@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sign up with email page</title>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" th:src="@{/js/jquery-1.12.3.min.js}"></script>
+</head>
+<body>
+
+<h2>使用电子邮箱注册</h2>
+<hr>
+<div>
+    <label for="email">邮箱地址：</label>
+    <input type="text" id="email" name="email" autofocus="autofocus" /> <br />
+
+    <label for="password">密&emsp;&emsp;码：</label>
+    <input type="password" id="password" name="password" /> <br />
+
+    <input type="button" value="提交" th:onclick="'javascript:doSubmit()'" />
+    <script type="text/javascript">
+        function doSubmit() {
+            let email = $("#email").val();
+            let password = $("#password").val();
+            alert("提交的信息：\n" + "email:" + email + "\npassword: " + password);
+
+            let url = "/sign-up/with-email.do";
+            $.ajax({
+                type: 'POST',
+                url:url,
+                data:JSON.stringify({email: email, password: password}),
+                dataType : "JSON",
+                contentType:"application/json",
+                success: function(data) {
+                    alert(data.content);
+                },
+                error:function(xhr, textStatus){
+                    alert(textStatus + "：" + xhr.responseText);
+                }
+            });
+        }
+    </script>
+</div>
+
+</body>
+</html>
+

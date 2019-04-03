@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>默认登录界面</title>
+	<script type="text/javascript" th:src="@{/js/jquery-1.12.3.min.js}"></script>
+	<link type="text/css" th:href="@{/css/main.min814b.css}" rel="stylesheet" />
+	<link type="text/css" th:href="@{/css/account6aa4.css}" rel="stylesheet" />
+</head>
+<body style="background: #f6f6f6">
+	<div class="wrapper">
+		<div class="log_head"></div>
+	</div>
+	<div class="login_wrap">
+		<div id="login_body" class="wrapper">
+			<div class="login_border">
+				<div class="login" style="display: block;">
+					<div class="link-reg">
+						<a href="javascript:" target="_blank">注册账号<em>&gt;</em></a>
+					</div>
+					<ul class="login-tab">
+						<li class="login-on">密码登录</li>
+						<li>随机码登录</li>
+					</ul>
+					<div class="login-body">
+						<form method="post" class="login-mode" style="display: block;">
+							<dl><dd><input id="username" name="username" type="text" placeholder="用户名/邮箱/手机号" /></dd></dl>
+							<dl><dd><input id="password" name="password" type="password" placeholder="登录密码" /></dd></dl>
+							<dl id="dl-captcha"><dd><input type="text" id="image-code" name="imageCode" style="width: 133px; margin-right: 10px;" placeholder="验证码" /><img src="/verification.token?type=image_code&width=90&height=34" width="90" height="34" title="点击换一个" style="vertical-align: middle; margin-top: -4px;" onclick="this.src='/verification.token?type=image_code&width=90&height=34&v='+Math.random()*100" /></dd></dl>
+							<div class="login-links">
+								<a href="javascript:" tabindex="-1" class="right" target="_blank">忘记密码?去找回</a>
+								<input id="remember-me" name="rememberMe" type="checkbox"/><label for="remember-me">下次自动登录</label>
+							</div>
+							<div class="login-error">error:</div>
+							<button style="outline:none">登录</button>
+						</form>
+						<div class="login-mode">
+							<dl><dd><input id="mobile" name="mobile" type="text" placeholder="手机号" /></dd></dl>
+							<dl><dd><input id="sms-code" type="text" style="width: 133px;" placeholder="短信验证码" /><input type="button" id="btn" class="btn_acquires-sms-code" value="获取验证码" th:onclick="'javascript:acquiresSmsCode(this)'" /></dd></dl>
+							<div class="login-error">error</div>
+							<button style="outline:none">登录</button>
+						</div>
+					</div>
+					<div class="social-login">
+						<h3>使用第三方账号登录：</h3>
+						<p>
+							<a href="javascript:"><i class="wx"></i>微信</a>
+							<a href="javascript:"><i class="qq"></i>QQ</a>
+						</p>
+					</div>
+					<div class="mode-toggle"></div>
+				</div>
+				<div class="login" style="display: none;">
+					<div class="mode-toggle" style="background-position:left bottom;"></div>
+				</div>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+	<div class="bottom">
+		<div class="wrapper">
+			<div class="copy"></div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:src="@{/js/account.js}"></script>
+</html>

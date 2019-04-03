@@ -1,0 +1,14 @@
+rootProject.name = 'watchdog'
+
+include 'watchdog-core', 'watchdog-browser', 'watchdog-native', 'samples:provider-user_center'
+
+rootProject.children.each { project ->
+    if (project.name == 'samples') {
+        project.children.each { subProject ->
+            subProject.buildFileName = "sample-${subProject.name}.gradle"
+        }
+    } else {
+        project.buildFileName = "${project.name}.gradle"
+    }
+}
+

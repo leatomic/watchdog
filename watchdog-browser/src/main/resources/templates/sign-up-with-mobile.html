@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sign up page</title>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" th:src="@{/js/jquery-1.12.3.min.js}"></script>
+</head>
+<body>
+
+<h2>使用手机号码注册</h2>
+<hr>
+<h3>第1步</h3>
+<div>
+    <label for="phone">手机号：</label>
+    <input type="text" id="phone" name="phone" autofocus="autofocus" /> <br>
+    <p>这里应该是人机检测...</p>
+    <input type="button" value="下一步" th:onclick="'javascript:confirmMobile()'"/>
+    <a th:href="@{/login}">已有账号，登录去？</a>
+    <script type="text/javascript">
+
+        $(function () {
+            $.ajaxSetup({
+                error:function(xhr, textStatus){
+                    alert(textStatus + "：" + xhr.responseText);
+                }
+            });
+        });
+
+
+        function confirmMobile() {
+            let phone = $("#phone").val();
+            alert("您的手机号码是： " + phone + "，准备向您的手机发送验证码短信！");
+            let url = "/sign-up/with-phone.do";
+            $.ajax({
+                type: 'POST',
+                url:url,
+                data:{
+                    phone:phone
+                },
+                dataType: 'json',
+                success: function() {
+                    $("#mobile_bound").val(phone);
+                    alert("验证码已发送至您的手机，请注意查收！");
+                }
+            });
+        }
+
+    </script>
+</div>
+<hr>
+<div>
+    <label for="phone_to_send_to">手机号：</label>
+    <input id="phone_to_send_to" type="text" disabled="disabled"/><br>
+
+    <label for="sms_code">验证码：</label>
+    <input type="text" id="sms_code" name="sms_code" autofocus="autofocus" />
+    <input type="button" value="重新发送验证码" th:onclick="'javascript:acquiresSmsCode()'"/><br>
+
+    <input type="button" value="确认" th:onclick="'javascript:submitSmsCode()'" />
+
+    <script type="text/javascript">
+        function acquiresSmsCode() {
+            let phone = $("#phone_to_send_to").val();
+            alert("您的手机号码是： " + phone + "，准备向您的手机发送验证码短信！");
+            let url = "/verification.token?type=sms_code&for-phone=" + phone;
+            $.ajax({
+                type: 'GET',
+                url:url,
+                dataType: 'json',
+                success: function() {
+                    alert("验证码已发送至您的手机，请注意查收！");
+                }
+            });
+        }
+
+        function submitSmsCode() {
+            let sms_code = $("#sms_code").val();
+            alert("准备提交的验证码： " + sms_code);
+            let url = "/sign-up/with-phone/verification.do";
+            $.ajax({
+                type: 'POST',
+                url:url,
+                dataType: 'json',
+                data:{
+                    sms_code:sms_code
+                },
+                success: function() {
+                    alert("验证码验证通过！请填写用户信息（用户名与密码）");
+                },
+                error: function (xhr, textStatus) {
+                    let data = JSON.parse(xhr.responseText);
+                    if (data.id === 'base.security.DuplicateMobile') {
+                        let r = confirm("该手机号码已注册，直接登录?")
+                        if (r === true) {
+                            alert("跳转至登录页面");
+                            location.href = "/login";
+                        }
+                    } else {
+                        alert(textStatus + "：" + xhr.responseText);
+                    }
+                }
+            });
+        }
+    </script>
+</div>
+
+<hr>
+<h3>第2步</h3>
+<div>
+    <label for="username">用户名：</label>
+    <input type="text" id="username" name="username" autofocus="autofocus" /> <br />
+
+    <label for="password">密&ensp;&ensp;码：</label>
+    <input type="password" id="password" name="password" /> <br />
+
+    <input type="button" value="提交" th:onclick="'javascript:submitUserDetails()'" />
+    <script type="text/javascript">
+        function submitUserDetails() {
+            let username = $("#username").val();
+            let password = $("#password").val();
+            alert("提交的信息：\n" + "username:" + username + "\npassword: " + password);
+
+            let url = "/sign-up/with-phone/user.details";
+            $.ajax({
+                type: 'POST',
+                url:url,
+                data:JSON.stringify({username:username, password: password}),
+                dataType : "JSON",
+                contentType:"application/json",
+                success: function() {
+                    alert("注册成功！进入第3步");
+                }
+            });
+        }
+
+    </script>
+</div>
+
+<hr>
+<h3>第3步</h3>
+<div>
+    <p>注册成功！</p>
+    <a th:href="@{/members/me}">跳转至个人首页?-></a>
+</div>
+</body>
+</html>
+
