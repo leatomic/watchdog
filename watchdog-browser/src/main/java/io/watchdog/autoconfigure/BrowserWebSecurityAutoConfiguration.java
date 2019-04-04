@@ -11,6 +11,8 @@ import io.watchdog.security.web.authentication.FormLoginFailureHandler;
 import io.watchdog.security.web.authentication.FormLoginSuccessHandler;
 import io.watchdog.security.web.verification.*;
 import io.watchdog.security.web.verification.impl.image.ImageCode;
+import io.watchdog.security.web.verification.impl.sms.SmsCode;
+import io.watchdog.security.web.verification.impl.sms.SmsCodeService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -23,19 +25,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @Import(BrowserWebSecurityAutoConfiguration.VerificationConfiguration.class)
 @ComponentScan(basePackages = {"io.watchdog.security.authentication.provider.endpoint"})
 public class BrowserWebSecurityAutoConfiguration {
-
-
-    @Bean
-    @ConditionalOnMissingBean(name = "formLoginFailureHandler")
-    protected AuthenticationFailureHandler formLoginFailureHandler(AuthenticationProperties authenticationProperties, FormLoginAttemptsLimiter formLoginAttemptsLimiter) {
-        String failureUrl = authenticationProperties.getFormLogin().getFailureUrl();
-        return new FormLoginFailureHandler(failureUrl, formLoginAttemptsLimiter);
-    }
 
 
     @Bean
@@ -46,18 +42,44 @@ public class BrowserWebSecurityAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "formLoginFailureHandler")
+    protected AuthenticationFailureHandler formLoginFailureHandler(AuthenticationProperties authenticationProperties, FormLoginAttemptsLimiter formLoginAttemptsLimiter) {
+        String failureUrl = authenticationProperties.getFormLogin().getFailureUrl();
+        return new FormLoginFailureHandler(failureUrl, formLoginAttemptsLimiter);
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean(name = "smsCodeLoginSuccessHandler")
+    protected AuthenticationSuccessHandler smsCodeLoginSuccessHandler(AuthenticationProperties authenticationProperties) {
+        String defaultTargetUrl = authenticationProperties.getFormLogin().getDefaultTargetUrl();
+        SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        successHandler.setDefaultTargetUrl(defaultTargetUrl);
+        return successHandler;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "smsCodeLoginFailureHandler")
+    protected AuthenticationFailureHandler smsCodeLoginFailureHandler(AuthenticationProperties authenticationProperties) {
+        String failureUrl = authenticationProperties.getFormLogin().getFailureUrl();
+        return new SimpleUrlAuthenticationFailureHandler(failureUrl);
+    }
+
+
+    @Bean
     public WebSecurityConfigurer<WebSecurity> baseWebSecurityConfigurer(
             AuthenticationProperties authenticationProperties,
-            AuthenticationFailureHandler formLoginFailureHandler,
-            AuthenticationSuccessHandler formLoginSuccessHandler,
+            AuthenticationFailureHandler formLoginFailureHandler, AuthenticationSuccessHandler formLoginSuccessHandler,
             TokenService<?> formLoginRequestVerificationTokenService,
+            FormLoginAttemptsLimiter formLoginAttemptsLimiter,
+            AuthenticationFailureHandler smsCodeLoginFailureHandler, AuthenticationSuccessHandler smsCodeLoginSuccessHandler,
+            SmsCodeService smsCodeLoginSmsCodeVerificationTokenService,
             VerificationFiltersConfigurer<HttpSecurity> verificationFiltersConfigurer
     ) {
         return new BrowserWebSecurityConfigurer(
                 authenticationProperties,
-                formLoginFailureHandler,
-                formLoginSuccessHandler,
-                formLoginRequestVerificationTokenService,
+                formLoginSuccessHandler, formLoginFailureHandler, formLoginRequestVerificationTokenService, formLoginAttemptsLimiter,
+                smsCodeLoginSuccessHandler, smsCodeLoginFailureHandler, smsCodeLoginSmsCodeVerificationTokenService,
                 verificationFiltersConfigurer
         );
     }
@@ -83,7 +105,6 @@ public class BrowserWebSecurityAutoConfiguration {
             };
         }
 
-        // TODO 合并到VerificationProvider里边
         @Bean
         @ConditionalOnMissingBean(VerificationFailureHandler.class)
         public VerificationFailureHandler verificationFailureHandler(ObjectMapper objectMapper) {
@@ -102,6 +123,12 @@ public class BrowserWebSecurityAutoConfiguration {
         public TokenRepository<ImageCode> imageCodeRepository(VerificationProperties verificationProperties) {
             String tokenAttribute   = verificationProperties.getService().getImageCode().getRepository().getTokenAttribute();
             return new HttpSessionTokenRepository<ImageCode>(tokenAttribute) {};
+        }
+
+        @Bean
+        public TokenRepository<SmsCode> smsCodeRepository(VerificationProperties verificationProperties) {
+            String tokenAttribute   = verificationProperties.getService().getSmsCode().getRepository().getTokenAttribute();
+            return new HttpSessionTokenRepository<SmsCode>(tokenAttribute) {};
         }
 
     }

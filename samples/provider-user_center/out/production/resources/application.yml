@@ -37,8 +37,6 @@ spring:
 
   thymeleaf.cache: false
 
-
-
 ---
 #spring.profiles: prod
 #

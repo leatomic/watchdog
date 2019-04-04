@@ -40,13 +40,13 @@ public class VerificationFiltersConfigurer<H extends HttpSecurityBuilder<H>>
         VerificationTokenEndpointFilter tokenEndpointFilter = new VerificationTokenEndpointFilter(acquiresTokenRequestMatcher, tokenTypeParameter, services, verificationServiceFailureHandler);
         http.addFilterBefore(tokenEndpointFilter, AbstractPreAuthenticatedProcessingFilter.class);
 
-        List<VerificationProvider> providers      = processing.providers;
-        VerificationFailureHandler failureHandler =
-                Objects.requireNonNull(processing.failureHandler, "VerificationFailureHandler has not been configured");
 
-        VerificationProcessingFilter processingFilter = new VerificationProcessingFilter(failureHandler);
+
+        List<VerificationProvider> providers      = processing.providers;
+
+        VerificationProcessingFilter processingFilter = new VerificationProcessingFilter();
         processingFilter.addProviders(providers);
-        http.addFilterBefore(processingFilter, AbstractPreAuthenticatedProcessingFilter.class);
+        http.addFilterBefore(postProcess(processingFilter), AbstractPreAuthenticatedProcessingFilter.class);
     }
 
     /**
@@ -55,7 +55,6 @@ public class VerificationFiltersConfigurer<H extends HttpSecurityBuilder<H>>
     public class ProcessingRegistry {
 
         private List<VerificationProvider> providers = new ArrayList<>();
-        private VerificationFailureHandler failureHandler;
 
         public final VerificationFiltersConfigurer<H>.ProcessingRegistry addProvider(VerificationProvider provider) {
             providers.add(Objects.requireNonNull(provider));
@@ -68,11 +67,6 @@ public class VerificationFiltersConfigurer<H extends HttpSecurityBuilder<H>>
                 for (VerificationProvider provider : providers)
                     this.providers.add(Objects.requireNonNull(provider));
             }
-            return this;
-        }
-
-        public final VerificationFiltersConfigurer<H>.ProcessingRegistry failureHandler(VerificationFailureHandler failureHandler) {
-            this.failureHandler = Objects.requireNonNull(failureHandler);
             return this;
         }
 

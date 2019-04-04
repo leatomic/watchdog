@@ -2,7 +2,9 @@ package io.watchdog.security.config.annotation.web;
 
 import io.watchdog.autoconfigure.properties.AuthenticationProperties;
 import io.watchdog.security.config.annotation.web.configurers.VerificationFiltersConfigurer;
+import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
 import io.watchdog.security.web.verification.TokenService;
+import io.watchdog.security.web.verification.impl.sms.SmsCodeService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,8 +16,19 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @Getter @Setter
 public class BrowserWebSecurityConfigurer extends CoreWebSecurityConfigurer {
 
-    public BrowserWebSecurityConfigurer(AuthenticationProperties authenticationProperties, AuthenticationFailureHandler formLoginFailureHandler, AuthenticationSuccessHandler formLoginSuccessHandler, TokenService<?> formLoginRequestVerificationTokenService, VerificationFiltersConfigurer<HttpSecurity> verificationFiltersConfigurer) {
-        super(authenticationProperties, formLoginFailureHandler, formLoginSuccessHandler, formLoginRequestVerificationTokenService, verificationFiltersConfigurer);
+    public BrowserWebSecurityConfigurer(
+            AuthenticationProperties authenticationProperties,
+            AuthenticationSuccessHandler formLoginSuccessHandler, AuthenticationFailureHandler formLoginFailureHandler,
+            TokenService<?> formLoginRequestVerificationTokenService,
+            FormLoginAttemptsLimiter formLoginAttemptsLimiter,
+            AuthenticationSuccessHandler smsCodeSuccessHandler, AuthenticationFailureHandler smsCodeLoginFailureHandler,
+            SmsCodeService smsCodeLoginSmsCodeVerificationTokenService,
+            VerificationFiltersConfigurer<HttpSecurity> verificationFiltersConfigurer) {
+        super(authenticationProperties,
+                formLoginSuccessHandler, formLoginFailureHandler, formLoginRequestVerificationTokenService, formLoginAttemptsLimiter,
+                smsCodeSuccessHandler, smsCodeLoginFailureHandler, smsCodeLoginSmsCodeVerificationTokenService,
+                verificationFiltersConfigurer
+        );
     }
 
     @Override

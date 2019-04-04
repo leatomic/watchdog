@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "watchdog.properties.authentication")
+@ConfigurationProperties(prefix = "watchdog.authentication")
 @Getter @Setter
 public class AuthenticationProperties implements InitializingBean {
 
@@ -24,10 +24,17 @@ public class AuthenticationProperties implements InitializingBean {
         private String processingUrl    = "/authenticate/form";
         private String defaultTargetUrl = "/";
         private String failureUrl       = "/login?error&approach=form-login";
+        private AttemptsLimit attemptsLimit = new AttemptsLimit();
 
         @Getter @Setter public static class Verification {
             private String tokenType = "image_code";
             private String tokenParameter = "verification-token";
+        }
+
+        @Getter @Setter public static class AttemptsLimit {
+            private long warningFailureAttempts = 1;
+            private long maximumFailureAttempts = 5;
+            private String attemptsFailureUrl = "/form-login.attempt-limited";
         }
     }
 

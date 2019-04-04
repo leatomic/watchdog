@@ -22,14 +22,14 @@ $(".login-tab li").click(function () {
  */
 function acquiresSmsCode(sender) {
     let $mobile = $('#mobile');
-    let phone = $.trim($mobile.val());
-    if (phone === "") {
-        onError('请填写手机号码！');
+    let mobile = $.trim($mobile.val());
+    if (mobile === "") {
+        alert('请填写手机号码！');
         $mobile.focus();
         return;
     }
 
-    let url = "/verification.token?type=sms_code&for-phone=" + phone;
+    let url = "/verification.token?type=sms_code&to-mobile=" + mobile;
     $.ajax({
         type: 'GET',
         url:url,
@@ -38,7 +38,7 @@ function acquiresSmsCode(sender) {
             limitAcquirement(sender);
         },
         error: function(xhr, textStatus){
-            onError(textStatus + "：" + xhr.responseText);
+            alert(textStatus + "：" + xhr.responseText);
         }
     });
 }

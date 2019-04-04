@@ -6,7 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
@@ -19,22 +22,19 @@ public class VerificationProvider<T extends VerificationToken> {
     private String tokenParameter;
     private TokenService<T> service;
     private VerificationSuccessHandler<T> successHandler;
-
-    @SuppressWarnings("unchecked")
-    public VerificationProvider(RequestMatcher requestMatcher, TokenService<T> service) {
-        this(requestMatcher, DEFAULT_TOKEN_PARAMETER, service, new DefaultVerificationSuccessHandler());
-    }
+    private VerificationFailureHandler failureHandler;
 
     @SuppressWarnings("unchecked")
     public VerificationProvider(RequestMatcher requestMatcher, String tokenParameter,
-                                TokenService<T> service) {
-        this(requestMatcher, tokenParameter, service, new DefaultVerificationSuccessHandler());
+                                TokenService<T> service,
+                                VerificationFailureHandler failureHandler) {
+        this(requestMatcher, tokenParameter, service, new NonOpVerificationSuccessHandler(), failureHandler);
     }
 
 
     public VerificationProvider(RequestMatcher requestMatcher, String tokenParameter,
                                 TokenService<T> service,
-                                VerificationSuccessHandler<T> successHandler) {
+                                VerificationSuccessHandler<T> successHandler, VerificationFailureHandler failureHandler) {
 
         this.requestMatcher = Objects.requireNonNull(requestMatcher);
 
@@ -44,35 +44,48 @@ public class VerificationProvider<T extends VerificationToken> {
         this.service = Objects.requireNonNull(service);
 
         this.successHandler = Objects.requireNonNull(successHandler);
-
+        this.failureHandler = Objects.requireNonNull(failureHandler);
     }
 
 
-    public void verifyIfNecessary(HttpServletRequest request) {
+    public boolean tryVerify(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         if (!requestMatcher.matches(request)) {
-            return;
+            return true;
         }
 
-        String presentedKey = obtainTokenKey(request);
+        T verified;
+        try {
+            String presentedKey = obtainTokenKey(request);
+            verified = service.verify(presentedKey);
+        }
+        catch (InternalVerificationException ive) {
+            log.error(ive.getMessage());
+            failureHandler.onVerificationFailure(request, response, ive);
+            return false;
+        }
+        catch (VerificationException ve) {
+            failureHandler.onVerificationFailure(request, response, ve);
+            return false;
+        }
 
-        T verified = service.verify(presentedKey);
+        if (verified == null)
+            throw new IllegalStateException("token service must return a non-null token instance after calling verify()");
 
         successHandler.onVerificationSuccess(request, verified);
-
+        return true;
     }
 
     private String obtainTokenKey(HttpServletRequest request) {
         String tokenKey = request.getParameter(tokenParameter);
-        if (tokenKey == null) {
-            throw new VerificationException("parameter '" + tokenParameter + "' not found");
-        } else if (tokenKey.isEmpty()) {
-            throw new VerificationException("invalid token: '" + tokenKey + "'");
+        if (tokenKey == null || tokenKey.isEmpty()) {
+            throw new VerificationException("验证码未提交或为空");
         }
+
         return tokenKey;
     }
 
-    private static class DefaultVerificationSuccessHandler implements VerificationSuccessHandler {
+    private static class NonOpVerificationSuccessHandler implements VerificationSuccessHandler {
 
         @Override
         public void onVerificationSuccess(HttpServletRequest request, VerificationToken token) {

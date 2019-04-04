@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class AccountUserDetailsAdapter implements UserDetails {
 
-    private Account target;
+    private final Account target;
 
     public AccountUserDetailsAdapter(Account target) {
         this.target = Objects.requireNonNull(target);
@@ -50,5 +50,9 @@ public class AccountUserDetailsAdapter implements UserDetails {
     @Override
     public boolean isEnabled() {
         return target.isEnabled();
+    }
+
+    public Account getTarget() {
+        return target;
     }
 }

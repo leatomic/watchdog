@@ -20,9 +20,17 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
     private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     private RequestMatcher formLoginProcessingRequestMatcher;
-    private FormLoginAttemptsLimiter limiter;
+    private FormLoginAttemptsLimiter attemptsLimiter;
 
-    private String attemptsLimitedForwardUrl;
+    private String attemptsFailureUrl;
+
+    public FormLoginAttemptsLimitFilter(RequestMatcher formLoginProcessingRequestMatcher,
+                                        FormLoginAttemptsLimiter attemptsLimiter,
+                                        String attemptsFailureUrl) {
+        this.formLoginProcessingRequestMatcher = formLoginProcessingRequestMatcher;
+        this.attemptsLimiter = attemptsLimiter;
+        this.attemptsFailureUrl = attemptsFailureUrl;
+    }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
@@ -31,9 +39,10 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
         HttpServletResponse response = (HttpServletResponse) res;
 
         if (formLoginProcessingRequestMatcher.matches(request)) {
-            boolean canDoAttempt = limiter.canReach(new FormLoginDetails(request));
+            boolean canDoAttempt = attemptsLimiter.canReach(new FormLoginDetails(request));
             if (!canDoAttempt) {
                 onAttemptsLimited(request, response);
+                return;
             }
         }
 
@@ -42,7 +51,7 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
     }
 
     private void onAttemptsLimited(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        redirectStrategy.sendRedirect(request, response, attemptsLimitedForwardUrl);
+        redirectStrategy.sendRedirect(request, response, attemptsFailureUrl);
     }
 
 

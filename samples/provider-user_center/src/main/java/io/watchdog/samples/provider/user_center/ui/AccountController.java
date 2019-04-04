@@ -4,7 +4,7 @@ import io.watchdog.http.SimpleResponseBody;
 import io.watchdog.samples.provider.user_center.domain.member.Account;
 import io.watchdog.samples.provider.user_center.service.AccountCreation;
 import io.watchdog.samples.provider.user_center.service.AccountService;
-import io.watchdog.security.authentication.UsernameAuthenticationToken;
+import io.watchdog.security.authentication.MobilePhoneAuthenticationToken;
 import io.watchdog.security.web.WebAttributes;
 import io.watchdog.validation.MobilePhone;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +85,7 @@ public class AccountController {
 
         service.create(new AccountCreation.WithPhone(phone));
 
-        doSignInAfterSignUpSucceed(new UsernameAuthenticationToken(phone), request);
+        doSignInAfterSignUpSucceed(new MobilePhoneAuthenticationToken(phone), request);
 
         return ResponseEntity.created(URI.create("/members/me")).build();
 
@@ -101,9 +101,6 @@ public class AccountController {
         SecurityContextHolder.getContext().setAuthentication(authenticated);
 
     }
-
-
-
 
 
 

@@ -32,6 +32,9 @@ public interface AccountService {
      */
     Optional<Account> findByUsername(String username);
 
+
+    Optional<Account> findByMobilePhone(String mobile);
+
     /**
      * 检测手机号码是否可用（于注册）
      * @return 若该手机号码已绑定到某一用户（无论该用户是否已注销）则返回false，否则返回true

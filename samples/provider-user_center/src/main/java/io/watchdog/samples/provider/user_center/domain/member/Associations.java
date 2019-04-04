@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Associations {
-    private String phone; // phone phone
+    private String phone; // mobile phone
     private String email; //
 }

@@ -8,13 +8,13 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 import java.util.Collection;
 import java.util.Objects;
 
-public class UsernameAuthenticationToken extends AbstractAuthenticationToken {
+public class MobilePhoneAuthenticationToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
     private final Object principal;
 
-    public UsernameAuthenticationToken(String username) {
+    public MobilePhoneAuthenticationToken(String username) {
         super(null);
         if (StringUtils.isBlank(username)) {
             throw new IllegalArgumentException("username cannot be blank");
@@ -23,8 +23,8 @@ public class UsernameAuthenticationToken extends AbstractAuthenticationToken {
         setAuthenticated(false);
     }
 
-    public UsernameAuthenticationToken(Object principal,
-                                       Collection<? extends GrantedAuthority> authorities) {
+    public MobilePhoneAuthenticationToken(Object principal,
+                                          Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = Objects.requireNonNull(principal, "principal cannot be null");
         super.setAuthenticated(true); // must use super, as we override

@@ -10,21 +10,20 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Objects;
 
-public class UsernameAuthenticationProvider implements AuthenticationProvider, InitializingBean {
+public class MobilePhoneAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
-    private final Logger logger = LoggerFactory.getLogger(UsernameAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(MobilePhoneAuthenticationProvider.class);
 
-    private UserDetailsService userDetailsService;
+    private MobilePhoneUserDetailsService userDetailsService;
 
     private UserDetailsChecker authenticationChecks = new DefaultAuthenticationChecks();
     private GrantedAuthoritiesMapper authoritiesMapper =  new NullAuthoritiesMapper();
 
-    public UsernameAuthenticationProvider(UserDetailsService userDetailsService) {
+    public MobilePhoneAuthenticationProvider(MobilePhoneUserDetailsService userDetailsService) {
         this.userDetailsService = Objects.requireNonNull(userDetailsService);
     }
 
@@ -32,8 +31,8 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider, I
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         Objects.requireNonNull(authentication, "authentication cannot be null");
-        if (!(authentication instanceof UsernameAuthenticationToken))
-            throw new IllegalArgumentException("Only UsernameAuthenticationToken is supported");
+        if (!(authentication instanceof MobilePhoneAuthenticationToken))
+            throw new IllegalArgumentException("Only MobilePhoneAuthenticationToken is supported");
 
         String mobile = (String) authentication.getPrincipal();
 
@@ -45,7 +44,7 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider, I
     }
 
     private Authentication createSuccessAuthentication(Authentication authentication, UserDetails user) {
-        UsernameAuthenticationToken result = new UsernameAuthenticationToken(
+        MobilePhoneAuthenticationToken result = new MobilePhoneAuthenticationToken(
                 user,
                 authoritiesMapper.mapAuthorities(user.getAuthorities())
         );
@@ -55,7 +54,7 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider, I
 
     private UserDetails retrieveUser(String mobile) {
         try {
-            UserDetails loadedUser = userDetailsService.loadUserByUsername(mobile);
+            UserDetails loadedUser = userDetailsService.loadUserByMobilePhone(mobile);
             if (loadedUser == null) {
                 throw new InternalAuthenticationServiceException(
                         "UserDetailsService returned null, which is an interface contract violation"
@@ -73,7 +72,7 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider, I
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return UsernameAuthenticationToken.class.isAssignableFrom(authentication);
+        return MobilePhoneAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
     @Override
@@ -81,17 +80,16 @@ public class UsernameAuthenticationProvider implements AuthenticationProvider, I
         Objects.requireNonNull(userDetailsService, "userDetailsService must be specified");
     }
 
+
     // ~Getter Setter
     // =================================================================================================================
-    public UserDetailsService getUserDetailsService() {
+    public MobilePhoneUserDetailsService getUserDetailsService() {
         return userDetailsService;
     }
 
-    public void setUserDetailsService(UserDetailsService userDetailsService) {
+    public void setUserDetailsService(MobilePhoneUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
-
-
 
     private class DefaultAuthenticationChecks implements UserDetailsChecker {
 

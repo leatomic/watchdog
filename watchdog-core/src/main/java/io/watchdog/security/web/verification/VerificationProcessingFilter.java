@@ -14,30 +14,22 @@ import java.util.Objects;
 public class VerificationProcessingFilter extends OncePerRequestFilter {
 
     private List<VerificationProvider> providers = new ArrayList<>();
-    private VerificationFailureHandler verificationFailureHandler;
 
-    public VerificationProcessingFilter(VerificationFailureHandler verificationFailureHandler) {
-        this.verificationFailureHandler = Objects.requireNonNull(verificationFailureHandler);
+    public VerificationProcessingFilter() {
+
+    }
+
+    public VerificationProcessingFilter(List<VerificationProvider> providers) {
+        this.providers = Objects.requireNonNull(providers);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        try {
-            for (VerificationProvider provider : providers) {
-                provider.verifyIfNecessary(request);
-            }
-        }
-        catch (InternalVerificationException ive) {
-            logger.error(ive.getMessage());
-            verificationFailureHandler.onVerificationFailure(request, response, ive);
-            return;
-        }
-        catch (VerificationException ve) {
-            // At least one of the verifications failed
-            verificationFailureHandler.onVerificationFailure(request, response, ve);
-            return;
+        for (VerificationProvider provider : providers) {
+            boolean requiredAndFailed = !provider.tryVerify(request, response);
+            if (requiredAndFailed) return;
         }
 
         filterChain.doFilter(request, response);
@@ -57,11 +49,4 @@ public class VerificationProcessingFilter extends OncePerRequestFilter {
         this.providers.addAll(Objects.requireNonNull(providers));
     }
 
-    public VerificationFailureHandler getVerificationFailureHandler() {
-        return verificationFailureHandler;
-    }
-
-    public void setVerificationFailureHandler(VerificationFailureHandler verificationFailureHandler) {
-        this.verificationFailureHandler = Objects.requireNonNull(verificationFailureHandler);
-    }
 }

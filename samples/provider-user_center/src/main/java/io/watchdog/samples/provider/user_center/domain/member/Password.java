@@ -8,13 +8,10 @@ import java.time.LocalDateTime;
 
 @Data @AllArgsConstructor
 public class Password {
-
     private String seq;
     private LocalDateTime expirationTime;
     private LocalDate lastModified;
-
     public boolean isExpired() {
         return expirationTime != null && expirationTime.isBefore(LocalDateTime.now());
     }
-
 }

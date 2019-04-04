@@ -7,9 +7,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import java.util.concurrent.TimeUnit;
 
 public class RedisFormLoginAttemptsLimiter extends FormLoginAttemptsLimiter {
-    public static final long DEFAULT_WARNING_FAILURE_ATTEMPTS = 1;
+    public static final long DEFAULT_WARNING_FAILURE_ATTEMPTS = 3;
     public static final long DEFAULT_MAXIMUM_FAILURE_ATTEMPTS = 8;
-    public static final String DEFAULT_KEY_PREFIX = "formLogin-login:failure-attempts:ip-";
+    public static final String DEFAULT_KEY_PREFIX = "form-login:failure-attempts:ip-";
 
     private HashOperations<String, String, Long> hashOps;
     private String keyPrefix;

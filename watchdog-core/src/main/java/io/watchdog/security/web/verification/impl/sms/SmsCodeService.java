@@ -14,15 +14,17 @@ import java.util.Random;
 @Getter @Setter
 public class SmsCodeService extends GeneralTokenService<SmsCode> {
 
-    private MobilePhoneValidator phoneValidator;
-    private String forPhoneParameter = "for-phone";
+    private MobilePhoneValidator mobilePhoneValidator;
+    private String toMobileParameter;
 
     public SmsCodeService(int codeLength, Duration codeValidityDuration,
+                          String toMobileParameter,
                           TokenRepository<SmsCode> tokenRepository,
-                          MobilePhoneValidator phoneValidator
+                          MobilePhoneValidator mobilePhoneValidator
     ) {
         super(codeLength, codeValidityDuration, tokenRepository);
-        this.phoneValidator = phoneValidator;
+        this.toMobileParameter = toMobileParameter;
+        this.mobilePhoneValidator = mobilePhoneValidator;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class SmsCodeService extends GeneralTokenService<SmsCode> {
 
         String key = generateCodeSeq(getCodeLength());
 
-        String forPhone = obtainPhoneFor(params);
+        String forPhone = obtainToMobile(params);
 
         return new SmsCode(key, getCodeValidityDuration(), forPhone);
 
@@ -51,14 +53,14 @@ public class SmsCodeService extends GeneralTokenService<SmsCode> {
         return new String(seq);
     }
 
-    private String obtainPhoneFor(Map<String, String[]> params) {
-        String[] strings = params.get(forPhoneParameter);
+    private String obtainToMobile(Map<String, String[]> params) {
+        String[] strings = params.get(toMobileParameter);
         if (strings == null || strings.length < 1) {
             throw new TokenServiceException("query parameter phone is not found");
         }
         String forPhone = strings[0];
-        if (phoneValidator.isValid(forPhone, null)) {
-            throw new TokenServiceException("invalid mobile phone, parameter for-phone : " + forPhone);
+        if (!mobilePhoneValidator.isValid(forPhone, null)) {
+            throw new TokenServiceException("invalid mobile phone, parameter " + toMobileParameter + " : " + forPhone);
         }
 
         return forPhone;

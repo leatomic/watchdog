@@ -16,7 +16,7 @@
 .login-on em { opacity: 1 !important; }
 .login dl { margin-top: 20px; }
 .login dl dd input[type=text], .login dl dd input[type=password] { border: solid 1px #d6d6d6; height: 34px; line-height: 28px\9; width: 233px; padding-left: 35px; border-radius:3px; }
-.btn_acquires-sms-code { width: 90px; margin-left: 10px; height: 36px; background: #f0f0f0; border: 1px solid #d6d6d6; border-radius:3px; cursor:pointer;}
+.btn-countdown { width: 90px; margin-left: 10px; height: 36px; background: #f0f0f0; border: 1px solid #d6d6d6; border-radius:3px; cursor:pointer;}
 .login-links { margin-top: 15px; }
 .login-links input[type=checkbox] { vertical-align: middle; }
 .login-links input[id='remember-me'] {margin-right: 5px; }

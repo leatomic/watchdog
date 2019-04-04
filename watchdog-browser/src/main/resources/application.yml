@@ -1,5 +1,2 @@
 spring:
-  thymeleaf:
-    prefix: classpath:/templates/
-    cache: false
-
+  thymeleaf.cache: false

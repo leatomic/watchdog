@@ -84,6 +84,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Optional<Account> findByMobilePhone(String mobile) {
+        if (log.isDebugEnabled()) {
+            log.debug("find account with mobile phone:{}", mobile);
+        }
+        return accountRepository.findOne(accountPO.phone.eq(mobile));
+    }
+
+    @Override
     public boolean detectEmail(String email) {
         return accountRepository.exists(accountPO.email.eq(email));
     }
