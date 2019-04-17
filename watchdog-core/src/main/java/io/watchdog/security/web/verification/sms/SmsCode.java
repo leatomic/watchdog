@@ -1,6 +1,6 @@
-package io.watchdog.security.web.verification.impl.sms;
+package io.watchdog.security.web.verification.sms;
 
-import io.watchdog.security.web.verification.VerificationToken;
+import io.watchdog.security.verification.VerificationToken;
 import lombok.Getter;
 import lombok.Setter;
 

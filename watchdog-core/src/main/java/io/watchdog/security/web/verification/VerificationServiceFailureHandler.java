@@ -1,5 +1,7 @@
 package io.watchdog.security.web.verification;
 
+import io.watchdog.security.verification.TokenServiceException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package io.watchdog.security.web.verification;
+package io.watchdog.security.verification;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;

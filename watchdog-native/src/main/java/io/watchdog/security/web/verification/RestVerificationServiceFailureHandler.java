@@ -2,6 +2,8 @@ package io.watchdog.security.web.verification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.watchdog.http.SimpleResponseBody;
+import io.watchdog.security.verification.InternalTokenServiceException;
+import io.watchdog.security.verification.TokenServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 

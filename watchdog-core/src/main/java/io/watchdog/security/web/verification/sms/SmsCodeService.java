@@ -1,8 +1,8 @@
-package io.watchdog.security.web.verification.impl.sms;
+package io.watchdog.security.web.verification.sms;
 
-import io.watchdog.security.web.verification.GeneralTokenService;
-import io.watchdog.security.web.verification.TokenServiceException;
-import io.watchdog.security.web.verification.TokenRepository;
+import io.watchdog.security.verification.GeneralTokenService;
+import io.watchdog.security.verification.TokenServiceException;
+import io.watchdog.security.verification.TokenRepository;
 import io.watchdog.validation.MobilePhoneValidator;
 import lombok.Getter;
 import lombok.Setter;

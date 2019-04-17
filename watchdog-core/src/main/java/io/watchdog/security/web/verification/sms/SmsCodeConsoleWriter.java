@@ -1,4 +1,4 @@
-package io.watchdog.security.web.verification.impl.sms;
+package io.watchdog.security.web.verification.sms;
 
 import io.watchdog.security.web.verification.TokenWriter;
 

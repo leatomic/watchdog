@@ -1,5 +1,7 @@
 package io.watchdog.security.web.verification;
 
+import io.watchdog.security.verification.TokenService;
+import io.watchdog.security.verification.VerificationToken;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

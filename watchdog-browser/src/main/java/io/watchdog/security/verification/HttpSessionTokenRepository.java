@@ -1,4 +1,4 @@
-package io.watchdog.security.web.verification;
+package io.watchdog.security.verification;
 
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

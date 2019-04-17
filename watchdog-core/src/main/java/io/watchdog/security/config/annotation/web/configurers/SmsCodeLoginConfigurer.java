@@ -1,6 +1,6 @@
 package io.watchdog.security.config.annotation.web.configurers;
 
-import io.watchdog.security.authentication.MobilePhoneAuthenticationProvider;
+import io.watchdog.security.authentication.MobilePhoneAttributeAuthenticationProvider;
 import io.watchdog.security.authentication.MobilePhoneUserDetailsService;
 import io.watchdog.security.web.WebAttributes;
 import io.watchdog.security.web.authentication.MobilePhoneAttributeAuthenticationFilter;
@@ -74,9 +74,13 @@ public class SmsCodeLoginConfigurer<H extends HttpSecurityBuilder<H>>
         }
 
         ApplicationContext applicationContext = http.getSharedObject(ApplicationContext.class);
-        MobilePhoneUserDetailsService userDetailsService = getDependency(applicationContext, MobilePhoneUserDetailsService.class);
-        MobilePhoneAuthenticationProvider mobilePhoneAuthenticationProvider = new MobilePhoneAuthenticationProvider(userDetailsService);
-        http.authenticationProvider(mobilePhoneAuthenticationProvider);
+        MobilePhoneUserDetailsService userDetailsService
+                = getDependency(applicationContext, MobilePhoneUserDetailsService.class);
+
+        MobilePhoneAttributeAuthenticationProvider usernameAttributeAuthenticationProvider
+                = new MobilePhoneAttributeAuthenticationProvider(userDetailsService);
+
+        http.authenticationProvider(usernameAttributeAuthenticationProvider);
 
         http.addFilterAfter(postProcess(authFilter), UsernamePasswordAuthenticationFilter.class);
     }

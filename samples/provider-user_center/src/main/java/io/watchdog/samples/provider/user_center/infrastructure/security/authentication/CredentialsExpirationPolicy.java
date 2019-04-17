@@ -6,15 +6,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
+ * 密码过期策略，用于确定新设置的密码将于何时过期
  * 默认ExpirationTime为null是表示永久不会过期
  */
 public interface CredentialsExpirationPolicy {
-
-    /**
-     *
-     * @return
-     */
-    Duration expiration();
 
     /**
      * 在账号的密码初始化，或者重置密码后需要设置新密码的到期时间，该策略方法的返回值将作为依据
@@ -30,11 +25,6 @@ public interface CredentialsExpirationPolicy {
     class Easy implements CredentialsExpirationPolicy {
 
         @Override
-        public Duration expiration() {
-            return null;
-        }
-
-        @Override
         public LocalDateTime newExpirationTimeForCredentialsReset() {
             return null;
         }
@@ -47,21 +37,16 @@ public interface CredentialsExpirationPolicy {
     class Strict implements CredentialsExpirationPolicy {
 
         // 修改密码后，密码的有效期将被重置为该值
-        private final Duration expiration;
+        private final Duration credentialsExpiration;
 
-        public Strict(Duration expiration) {
-            Durations.requiresPositive(expiration, "expiration");
-            this.expiration = expiration;
-        }
-
-        @Override
-        public Duration expiration() {
-            return expiration;
+        public Strict(Duration credentialsExpiration) {
+            Durations.requiresPositive(credentialsExpiration, "credentialsExpiration");
+            this.credentialsExpiration = credentialsExpiration;
         }
 
         @Override
         public LocalDateTime newExpirationTimeForCredentialsReset() {
-            return LocalDateTime.now().plus(expiration);
+            return LocalDateTime.now().plus(credentialsExpiration);
         }
     }
 

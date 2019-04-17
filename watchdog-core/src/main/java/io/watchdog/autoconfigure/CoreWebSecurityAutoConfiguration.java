@@ -2,16 +2,22 @@ package io.watchdog.autoconfigure;
 
 import io.watchdog.autoconfigure.properties.AuthenticationProperties;
 import io.watchdog.autoconfigure.properties.VerificationProperties;
+import io.watchdog.security.config.BeanIds;
 import io.watchdog.security.config.annotation.web.configurers.VerificationFiltersConfigurer;
+import io.watchdog.security.verification.TokenRepository;
+import io.watchdog.security.verification.TokenService;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
 import io.watchdog.security.web.authentication.RedisFormLoginAttemptsLimiter;
-import io.watchdog.security.web.verification.*;
-import io.watchdog.security.web.verification.impl.image.DefaultImageCodeWriter;
-import io.watchdog.security.web.verification.impl.image.ImageCode;
-import io.watchdog.security.web.verification.impl.image.ImageCodeService;
-import io.watchdog.security.web.verification.impl.sms.SmsCode;
-import io.watchdog.security.web.verification.impl.sms.SmsCodeConsoleWriter;
-import io.watchdog.security.web.verification.impl.sms.SmsCodeService;
+import io.watchdog.security.web.verification.TokenWriter;
+import io.watchdog.security.web.verification.VerificationProvider;
+import io.watchdog.security.web.verification.VerificationService;
+import io.watchdog.security.web.verification.VerificationServiceFailureHandler;
+import io.watchdog.security.web.verification.image.DefaultImageCodeWriter;
+import io.watchdog.security.web.verification.image.ImageCode;
+import io.watchdog.security.web.verification.image.ImageCodeService;
+import io.watchdog.security.web.verification.sms.SmsCode;
+import io.watchdog.security.web.verification.sms.SmsCodeConsoleWriter;
+import io.watchdog.security.web.verification.sms.SmsCodeService;
 import io.watchdog.validation.MobilePhoneValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +41,7 @@ import java.util.List;
 @Configuration
 @Import({ValidationConfiguration.class, CoreWebSecurityAutoConfiguration.VerificationConfiguration.class})
 @EnableConfigurationProperties({AuthenticationProperties.class})
-@PropertySource("classpath:/config/authentication.yml")
+@PropertySource({"classpath:/config/authentication.properties", "classpath:/config/verification.properties"})
 @EnableWebSecurity
 public class CoreWebSecurityAutoConfiguration {
 
@@ -128,9 +134,10 @@ public class CoreWebSecurityAutoConfiguration {
             );
         }
 
-        @Bean
-        @ConditionalOnMissingBean(name = "smsCodeWriter")
+        @Bean(BeanIds.SMS_CODE_SENDER)
+        @ConditionalOnMissingBean(name = BeanIds.SMS_CODE_SENDER)
         public TokenWriter<SmsCode> smsCodeWriter() {
+            log.warn("SmsCodeSender was not configured, using SmsCodeConsoleWriter...");
             return new SmsCodeConsoleWriter();
         }
 

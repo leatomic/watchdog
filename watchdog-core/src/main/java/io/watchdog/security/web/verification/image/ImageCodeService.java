@@ -1,7 +1,7 @@
-package io.watchdog.security.web.verification.impl.image;
+package io.watchdog.security.web.verification.image;
 
-import io.watchdog.security.web.verification.GeneralTokenService;
-import io.watchdog.security.web.verification.TokenRepository;
+import io.watchdog.security.verification.GeneralTokenService;
+import io.watchdog.security.verification.TokenRepository;
 
 import java.time.Duration;
 import java.util.Map;

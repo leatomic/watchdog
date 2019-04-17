@@ -1,6 +1,6 @@
-package io.watchdog.security.web.verification.impl.image;
+package io.watchdog.security.web.verification.image;
 
-import io.watchdog.security.web.verification.VerificationToken;
+import io.watchdog.security.verification.VerificationToken;
 import lombok.Getter;
 import lombok.Setter;
 

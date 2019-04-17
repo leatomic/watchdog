@@ -4,18 +4,17 @@ import io.watchdog.autoconfigure.properties.AuthenticationProperties;
 import io.watchdog.security.config.annotation.web.configurers.FormLoginAttemptsLimitConfigurer;
 import io.watchdog.security.config.annotation.web.configurers.SmsCodeLoginConfigurer;
 import io.watchdog.security.config.annotation.web.configurers.VerificationFiltersConfigurer;
+import io.watchdog.security.verification.TokenService;
 import io.watchdog.security.web.WebAttributes;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
 import io.watchdog.security.web.authentication.RequiresVerificationFormLoginRequestMatcher;
-import io.watchdog.security.web.verification.TokenService;
 import io.watchdog.security.web.verification.VerificationFailureHandler;
 import io.watchdog.security.web.verification.VerificationProvider;
 import io.watchdog.security.web.verification.VerificationSuccessHandler;
-import io.watchdog.security.web.verification.impl.sms.SmsCode;
-import io.watchdog.security.web.verification.impl.sms.SmsCodeService;
+import io.watchdog.security.web.verification.sms.SmsCode;
+import io.watchdog.security.web.verification.sms.SmsCodeService;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -26,7 +25,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-@Order(99)
 @Getter @Setter
 public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 

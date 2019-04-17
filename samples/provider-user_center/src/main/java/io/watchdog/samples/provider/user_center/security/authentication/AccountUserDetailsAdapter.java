@@ -16,7 +16,6 @@ public class AccountUserDetailsAdapter implements UserDetails {
         this.target = Objects.requireNonNull(target);
     }
 
-    //TODO 设计基于资源的权限管理模块
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
@@ -55,4 +54,5 @@ public class AccountUserDetailsAdapter implements UserDetails {
     public Account getTarget() {
         return target;
     }
+
 }

@@ -1,5 +1,7 @@
 package io.watchdog.security.web.verification;
 
+import io.watchdog.security.verification.InternalTokenServiceException;
+import io.watchdog.security.verification.TokenServiceException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +65,7 @@ public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
      * <p>
      *     然而,
      * <ol>
-     *     <li></li>注册{@link RequestContextListener}将只能获取得到{@link HttpServletRequest}，
+     *     <li>注册{@link RequestContextListener}将只能获取得到{@link HttpServletRequest}，
      *     而无法获取到{@link HttpServletResponse}</li>
      *     <li>注册{@link RequestContextFilter}则虽然能获取到{@link HttpServletResponse}，但其被注册在springSecurityFilterChain之后，因此我们无法及时获取到</li>
      *     <li>{@link DispatcherServlet}中注入的作用域则更靠后</li>

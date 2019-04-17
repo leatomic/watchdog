@@ -1,13 +1,15 @@
 package io.watchdog.samples.provider.user_center.security.authentication;
 
 import io.watchdog.samples.provider.user_center.service.AccountService;
+import io.watchdog.security.authentication.MobilePhoneUserDetails;
+import io.watchdog.security.authentication.MobilePhoneUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Slf4j
-public class DaoUserDetailsService implements UserDetailsService {
+public class DaoUserDetailsService implements UserDetailsService, MobilePhoneUserDetailsService {
 
     private final AccountService accountService;
 
@@ -28,5 +30,15 @@ public class DaoUserDetailsService implements UserDetailsService {
     }
 
 
+    @Override
+    public MobilePhoneUserDetails loadUserByMobilePhone(String mobilePhone) throws UsernameNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("attempt to load user by mobile phone: " + mobilePhone);
+        }
+
+        return accountService.findByMobilePhone(mobilePhone)
+                .map(AccountMobilePhoneUserDetailsAdapter::new)
+                .orElseThrow(() -> new UsernameNotFoundException("user for mobile phone: " + mobilePhone + " not found"));
+    }
 }
 

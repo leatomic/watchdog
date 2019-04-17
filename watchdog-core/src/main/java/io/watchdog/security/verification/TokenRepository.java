@@ -1,4 +1,4 @@
-package io.watchdog.security.web.verification;
+package io.watchdog.security.verification;
 
 
 public interface TokenRepository<T extends VerificationToken> {

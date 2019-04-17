@@ -1,4 +1,6 @@
-package io.watchdog.security.web.verification;
+package io.watchdog.security.verification;
+
+import io.watchdog.security.web.verification.VerificationException;
 
 public class TokenServiceException extends VerificationException {
 

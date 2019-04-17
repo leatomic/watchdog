@@ -6,37 +6,37 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.lang.reflect.ParameterizedType;
+import java.util.Collection;
 import java.util.Objects;
 
-public class MobilePhoneAuthenticationProvider implements AuthenticationProvider, InitializingBean {
+public abstract class UsernameAttributeAuthenticationProvider<T extends UsernameAttributeAuthenticationToken>
+        implements AuthenticationProvider, InitializingBean {
 
-    private final Logger logger = LoggerFactory.getLogger(MobilePhoneAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(UsernameAttributeAuthenticationProvider.class);
 
-    private MobilePhoneUserDetailsService userDetailsService;
+    private Class<T> tokenClass = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 
     private UserDetailsChecker authenticationChecks = new DefaultAuthenticationChecks();
     private GrantedAuthoritiesMapper authoritiesMapper =  new NullAuthoritiesMapper();
-
-    public MobilePhoneAuthenticationProvider(MobilePhoneUserDetailsService userDetailsService) {
-        this.userDetailsService = Objects.requireNonNull(userDetailsService);
-    }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         Objects.requireNonNull(authentication, "authentication cannot be null");
-        if (!(authentication instanceof MobilePhoneAuthenticationToken))
-            throw new IllegalArgumentException("Only MobilePhoneAuthenticationToken is supported");
+        if (!supports(authentication.getClass()))
+            throw new IllegalArgumentException("Only " + tokenClass.getName() + " is supported");
 
-        String mobile = (String) authentication.getPrincipal();
+        String username = (String) authentication.getPrincipal();
 
-        UserDetails user = retrieveUser(mobile);
+        UserDetails user = retrieveUser(username);
 
         authenticationChecks.check(user);
 
@@ -44,17 +44,16 @@ public class MobilePhoneAuthenticationProvider implements AuthenticationProvider
     }
 
     private Authentication createSuccessAuthentication(Authentication authentication, UserDetails user) {
-        MobilePhoneAuthenticationToken result = new MobilePhoneAuthenticationToken(
-                user,
-                authoritiesMapper.mapAuthorities(user.getAuthorities())
-        );
+        T result = createSuccessAuthentication(user, authoritiesMapper.mapAuthorities(user.getAuthorities()));
         result.setDetails(authentication.getDetails());
         return result;
     }
 
-    private UserDetails retrieveUser(String mobile) {
+    protected abstract T createSuccessAuthentication(UserDetails user, Collection<? extends GrantedAuthority> authorities);
+
+    private UserDetails retrieveUser(String username) {
         try {
-            UserDetails loadedUser = userDetailsService.loadUserByMobilePhone(mobile);
+            UserDetails loadedUser = loadUser(username);
             if (loadedUser == null) {
                 throw new InternalAuthenticationServiceException(
                         "UserDetailsService returned null, which is an interface contract violation"
@@ -70,26 +69,15 @@ public class MobilePhoneAuthenticationProvider implements AuthenticationProvider
         }
     }
 
+    protected abstract UserDetails loadUser(String username) throws UsernameNotFoundException;
+
     @Override
     public boolean supports(Class<?> authentication) {
-        return MobilePhoneAuthenticationToken.class.isAssignableFrom(authentication);
+        return tokenClass.isAssignableFrom(authentication);
     }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Objects.requireNonNull(userDetailsService, "userDetailsService must be specified");
-    }
-
 
     // ~Getter Setter
     // =================================================================================================================
-    public MobilePhoneUserDetailsService getUserDetailsService() {
-        return userDetailsService;
-    }
-
-    public void setUserDetailsService(MobilePhoneUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
 
     private class DefaultAuthenticationChecks implements UserDetailsChecker {
 

@@ -1,5 +1,8 @@
 package io.watchdog.security.web.verification;
 
+import io.watchdog.security.verification.InternalTokenServiceException;
+import io.watchdog.security.verification.TokenService;
+import io.watchdog.security.verification.VerificationToken;
 import lombok.Getter;
 import lombok.Setter;
 

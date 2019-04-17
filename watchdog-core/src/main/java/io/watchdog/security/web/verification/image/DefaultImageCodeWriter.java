@@ -1,4 +1,4 @@
-package io.watchdog.security.web.verification.impl.image;
+package io.watchdog.security.web.verification.image;
 
 import io.watchdog.security.web.verification.TokenWriter;
 import org.springframework.http.HttpStatus;
