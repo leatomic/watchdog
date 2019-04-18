@@ -10,10 +10,11 @@ import io.watchdog.security.verification.HttpSessionTokenRepository;
 import io.watchdog.security.verification.InternalTokenServiceException;
 import io.watchdog.security.verification.TokenRepository;
 import io.watchdog.security.verification.TokenService;
+import io.watchdog.security.web.authentication.FormLoginAttemptsLimitHandler;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
-import io.watchdog.security.web.authentication.FormLoginFailureHandler;
-import io.watchdog.security.web.authentication.FormLoginSuccessHandler;
-import io.watchdog.security.web.verification.*;
+import io.watchdog.security.web.authentication.RedirectFormLoginAttemptsLimitHandler;
+import io.watchdog.security.web.verification.VerificationFailureHandler;
+import io.watchdog.security.web.verification.VerificationServiceFailureHandler;
 import io.watchdog.security.web.verification.image.ImageCode;
 import io.watchdog.security.web.verification.sms.SmsCode;
 import io.watchdog.security.web.verification.sms.SmsCodeService;
@@ -37,21 +38,26 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 @ComponentScan(basePackages = {"io.watchdog.security.authentication.provider.endpoint"})
 public class BrowserWebSecurityAutoConfiguration {
 
-
     @Bean
     @ConditionalOnMissingBean(name = "formLoginSuccessHandler")
-    protected AuthenticationSuccessHandler formLoginSuccessHandler(AuthenticationProperties authenticationProperties, FormLoginAttemptsLimiter formLoginAttemptsLimiter) {
-        String defaultTargetUrl = authenticationProperties.getFormLogin().getDefaultTargetUrl();
-        return new FormLoginSuccessHandler(defaultTargetUrl, formLoginAttemptsLimiter);
+    protected AuthenticationSuccessHandler formLoginSuccessHandler(AuthenticationProperties authenticationProperties) {
+        SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        successHandler.setDefaultTargetUrl(authenticationProperties.getFormLogin().getDefaultTargetUrl());
+        return successHandler;
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "formLoginFailureHandler")
     protected AuthenticationFailureHandler formLoginFailureHandler(AuthenticationProperties authenticationProperties, FormLoginAttemptsLimiter formLoginAttemptsLimiter) {
         String failureUrl = authenticationProperties.getFormLogin().getFailureUrl();
-        return new FormLoginFailureHandler(failureUrl, formLoginAttemptsLimiter);
+        return new SimpleUrlAuthenticationFailureHandler(failureUrl);
     }
 
+    @Bean
+    public FormLoginAttemptsLimitHandler formLoginAttemptsLimitHandler(AuthenticationProperties authenticationProperties) {
+        String formLoginAttemptsFailureUrl = authenticationProperties.getFormLogin().getAttemptsLimit().getAttemptsFailureUrl();
+        return new RedirectFormLoginAttemptsLimitHandler(formLoginAttemptsFailureUrl);
+    }
 
     @Bean
     @ConditionalOnMissingBean(name = "smsCodeLoginSuccessHandler")
@@ -70,19 +76,22 @@ public class BrowserWebSecurityAutoConfiguration {
     }
 
 
+
     @Bean
     public WebSecurityConfigurer<WebSecurity> baseWebSecurityConfigurer(
             AuthenticationProperties authenticationProperties,
             AuthenticationFailureHandler formLoginFailureHandler, AuthenticationSuccessHandler formLoginSuccessHandler,
             TokenService<?> formLoginRequestVerificationTokenService,
-            FormLoginAttemptsLimiter formLoginAttemptsLimiter,
+            FormLoginAttemptsLimiter formLoginAttemptsLimiter, FormLoginAttemptsLimitHandler formLoginAttemptsLimitHandler,
             AuthenticationFailureHandler smsCodeLoginFailureHandler, AuthenticationSuccessHandler smsCodeLoginSuccessHandler,
             SmsCodeService smsCodeLoginSmsCodeVerificationTokenService,
             VerificationFiltersConfigurer<HttpSecurity> verificationFiltersConfigurer
     ) {
         return new BrowserWebSecurityConfigurer(
                 authenticationProperties,
-                formLoginSuccessHandler, formLoginFailureHandler, formLoginRequestVerificationTokenService, formLoginAttemptsLimiter,
+                formLoginSuccessHandler, formLoginFailureHandler,
+                formLoginRequestVerificationTokenService,
+                formLoginAttemptsLimiter, formLoginAttemptsLimitHandler,
                 smsCodeLoginSuccessHandler, smsCodeLoginFailureHandler, smsCodeLoginSmsCodeVerificationTokenService,
                 verificationFiltersConfigurer
         );

@@ -1,8 +1,6 @@
 package io.watchdog.security.web.authentication;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -17,19 +15,16 @@ import java.io.IOException;
 @Slf4j
 public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-
     private RequestMatcher formLoginProcessingRequestMatcher;
     private FormLoginAttemptsLimiter attemptsLimiter;
-
-    private String attemptsFailureUrl;
+    private FormLoginAttemptsLimitHandler attemptsLimitedHandler;
 
     public FormLoginAttemptsLimitFilter(RequestMatcher formLoginProcessingRequestMatcher,
                                         FormLoginAttemptsLimiter attemptsLimiter,
-                                        String attemptsFailureUrl) {
+                                        FormLoginAttemptsLimitHandler attemptsLimitedHandler) {
         this.formLoginProcessingRequestMatcher = formLoginProcessingRequestMatcher;
         this.attemptsLimiter = attemptsLimiter;
-        this.attemptsFailureUrl = attemptsFailureUrl;
+        this.attemptsLimitedHandler = attemptsLimitedHandler;
     }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -39,9 +34,9 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
         HttpServletResponse response = (HttpServletResponse) res;
 
         if (formLoginProcessingRequestMatcher.matches(request)) {
-            boolean canDoAttempt = attemptsLimiter.canReach(new FormLoginDetails(request));
-            if (!canDoAttempt) {
-                onAttemptsLimited(request, response);
+            boolean allowed = attemptsLimiter.checkAttempt(new FormLoginDetails(request));
+            if (!allowed) {
+                attemptsLimitedHandler.onAttemptsLimited(request, response);
                 return;
             }
         }
@@ -50,9 +45,7 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
 
     }
 
-    private void onAttemptsLimited(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        redirectStrategy.sendRedirect(request, response, attemptsFailureUrl);
-    }
+
 
 
 

@@ -2,6 +2,7 @@ package io.watchdog.security.config.annotation.web;
 
 import io.watchdog.autoconfigure.properties.AuthenticationProperties;
 import io.watchdog.security.config.annotation.web.configurers.VerificationFiltersConfigurer;
+import io.watchdog.security.web.authentication.FormLoginAttemptsLimitHandler;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
 import io.watchdog.security.verification.TokenService;
 import io.watchdog.security.web.verification.sms.SmsCodeService;
@@ -20,12 +21,14 @@ public class BrowserWebSecurityConfigurer extends CoreWebSecurityConfigurer {
             AuthenticationProperties authenticationProperties,
             AuthenticationSuccessHandler formLoginSuccessHandler, AuthenticationFailureHandler formLoginFailureHandler,
             TokenService<?> formLoginRequestVerificationTokenService,
-            FormLoginAttemptsLimiter formLoginAttemptsLimiter,
+            FormLoginAttemptsLimiter formLoginAttemptsLimiter, FormLoginAttemptsLimitHandler formLoginAttemptsLimitHandler,
             AuthenticationSuccessHandler smsCodeSuccessHandler, AuthenticationFailureHandler smsCodeLoginFailureHandler,
             SmsCodeService smsCodeLoginSmsCodeVerificationTokenService,
             VerificationFiltersConfigurer<HttpSecurity> verificationFiltersConfigurer) {
         super(authenticationProperties,
-                formLoginSuccessHandler, formLoginFailureHandler, formLoginRequestVerificationTokenService, formLoginAttemptsLimiter,
+                formLoginSuccessHandler, formLoginFailureHandler,
+                formLoginRequestVerificationTokenService,
+                formLoginAttemptsLimiter, formLoginAttemptsLimitHandler,
                 smsCodeSuccessHandler, smsCodeLoginFailureHandler, smsCodeLoginSmsCodeVerificationTokenService,
                 verificationFiltersConfigurer
         );
@@ -47,6 +50,9 @@ public class BrowserWebSecurityConfigurer extends CoreWebSecurityConfigurer {
 
         String loginPageUrl = getAuthenticationProperties().getLoginPageUrl();
         http.formLogin().loginPage(loginPageUrl);
+
+        String formLoginAttemptsFailureUrl = getAuthenticationProperties().getFormLogin().getAttemptsLimit().getAttemptsFailureUrl();
+        http.authorizeRequests().antMatchers(formLoginAttemptsFailureUrl).permitAll();
 
     }
 }

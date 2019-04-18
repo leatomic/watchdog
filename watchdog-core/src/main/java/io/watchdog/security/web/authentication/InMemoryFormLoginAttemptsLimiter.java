@@ -21,24 +21,30 @@ public class InMemoryFormLoginAttemptsLimiter extends FormLoginAttemptsLimiter i
         super(warningFailureAttempts, maximumFailureAttempts);
     }
 
+
     @Override
-    public boolean canReach(Object details) {
+    protected long getFailures(Object details) {
         String key = parseKey(details);
         AtomicLong failureAttempts = failureAttemptsMap.get(key);
-        return failureAttempts == null || failureAttempts.get() < maximumFailureAttempts;
+        return failureAttempts == null ? 0 : failureAttempts.get();
     }
 
     @Override
-    public boolean reachAndWithoutWarning(Object details) {
+    protected long incrementFailure(Object details) {
         String key = parseKey(details);
         AtomicLong failureAttempts = failureAttemptsMap.computeIfAbsent(key, k -> new AtomicLong());
-        return failureAttempts.addAndGet(1) < warningFailureAttempts;
+        return failureAttempts.addAndGet(1);
     }
 
     @Override
-    public void resetAttempts(Object details) {
+    public void clearFailures(Object details) {
         failureAttemptsMap.remove(parseKey(details));
     }
+
+
+
+
+
 
 
     private String parseKey(Object details) {

@@ -1,6 +1,7 @@
 package io.watchdog.security.config.annotation.web.configurers;
 
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimitFilter;
+import io.watchdog.security.web.authentication.FormLoginAttemptsLimitHandler;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,7 +13,7 @@ public class FormLoginAttemptsLimitConfigurer <H extends HttpSecurityBuilder<H>>
 
     private RequestMatcher requestMatcher;
     private FormLoginAttemptsLimiter attemptsLimiter;
-    private String attemptsFailureUrl;
+    private FormLoginAttemptsLimitHandler attemptsLimitHandler;
 
     public FormLoginAttemptsLimitConfigurer<H> formLoginProcessingRequestMatcher(RequestMatcher formLoginProcessingRequestMatcher) {
         this.requestMatcher = formLoginProcessingRequestMatcher;
@@ -24,14 +25,14 @@ public class FormLoginAttemptsLimitConfigurer <H extends HttpSecurityBuilder<H>>
         return this;
     }
 
-    public FormLoginAttemptsLimitConfigurer<H> attemptsFailureUrl(String attemptsFailureUrl) {
-        this.attemptsFailureUrl = attemptsFailureUrl;
+    public FormLoginAttemptsLimitConfigurer<H> attemptsLimitHandler(FormLoginAttemptsLimitHandler attemptsLimitHandler) {
+        this.attemptsLimitHandler = attemptsLimitHandler;
         return this;
     }
 
     @Override
     public void configure(H http) throws Exception {
-        FormLoginAttemptsLimitFilter limitFilter = new FormLoginAttemptsLimitFilter(requestMatcher, attemptsLimiter, attemptsFailureUrl);
+        FormLoginAttemptsLimitFilter limitFilter = new FormLoginAttemptsLimitFilter(requestMatcher, attemptsLimiter, attemptsLimitHandler);
         http.addFilterBefore(postProcess(limitFilter), UsernamePasswordAuthenticationFilter.class);
     }
 

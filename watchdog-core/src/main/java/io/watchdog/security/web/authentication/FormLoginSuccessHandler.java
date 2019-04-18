@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.ServletException;
@@ -15,24 +15,26 @@ import java.io.IOException;
 
 @Slf4j
 @Getter @Setter
-public class FormLoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+public class FormLoginSuccessHandler implements AuthenticationSuccessHandler {
+
+    private AuthenticationSuccessHandler target;
+
 
     private FormLoginAttemptsLimiter attemptsLimiter;
 
-    public FormLoginSuccessHandler(String defaultTargetUrl, FormLoginAttemptsLimiter attemptsLimiter) {
-        super();
+    public FormLoginSuccessHandler(FormLoginAttemptsLimiter attemptsLimiter, AuthenticationSuccessHandler target) {
         this.attemptsLimiter = attemptsLimiter;
-        setDefaultTargetUrl(defaultTargetUrl);
+        this.target = target;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
 
-        attemptsLimiter.resetAttempts(new FormLoginDetails(request));
+        attemptsLimiter.clearFailures(new FormLoginDetails(request));
 
         // enables the next formLogin login request to run without token verification
         WebUtils.setSessionAttribute(request, WebAttributes.FORM_LOGIN_REQUIRES_VERIFICATION_TOKEN, null);
 
-        super.onAuthenticationSuccess(request, response, authentication);
+        target.onAuthenticationSuccess(request, response, authentication);
     }
 }

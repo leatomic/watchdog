@@ -6,8 +6,7 @@ import io.watchdog.security.config.annotation.web.configurers.SmsCodeLoginConfig
 import io.watchdog.security.config.annotation.web.configurers.VerificationFiltersConfigurer;
 import io.watchdog.security.verification.TokenService;
 import io.watchdog.security.web.WebAttributes;
-import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
-import io.watchdog.security.web.authentication.RequiresVerificationFormLoginRequestMatcher;
+import io.watchdog.security.web.authentication.*;
 import io.watchdog.security.web.verification.VerificationFailureHandler;
 import io.watchdog.security.web.verification.VerificationProvider;
 import io.watchdog.security.web.verification.VerificationSuccessHandler;
@@ -49,7 +48,7 @@ public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
             AuthenticationProperties authenticationProperties,
             AuthenticationSuccessHandler formLoginSuccessHandler, AuthenticationFailureHandler formLoginFailureHandler,
             TokenService<?> formLoginRequestVerificationTokenService,
-            FormLoginAttemptsLimiter formLoginAttemptsLimiter,
+            FormLoginAttemptsLimiter formLoginAttemptsLimiter, FormLoginAttemptsLimitHandler formLoginAttemptsLimitHandler,
             AuthenticationSuccessHandler smsCodeLoginSuccessHandler, AuthenticationFailureHandler smsCodeLoginFailureHandler,
             SmsCodeService smsCodeLoginSmsCodeVerificationTokenService,
             VerificationFiltersConfigurer<HttpSecurity> verificationFiltersConfigurer) {
@@ -59,6 +58,7 @@ public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         this.formLoginFailureHandler = formLoginFailureHandler;
         this.formLoginRequestVerificationTokenService = formLoginRequestVerificationTokenService;
         this.formLoginAttemptsLimiter = formLoginAttemptsLimiter;
+        this.formLoginAttemptsLimitHandler = formLoginAttemptsLimitHandler;
 
         this.smsCodeLoginSuccessHandler = smsCodeLoginSuccessHandler;
         this.smsCodeLoginFailureHandler = smsCodeLoginFailureHandler;
@@ -71,6 +71,7 @@ public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
     private AuthenticationFailureHandler formLoginFailureHandler;
     private TokenService<?> formLoginRequestVerificationTokenService;
     private FormLoginAttemptsLimiter formLoginAttemptsLimiter;
+    private FormLoginAttemptsLimitHandler formLoginAttemptsLimitHandler;
     private AuthenticationSuccessHandler smsCodeLoginSuccessHandler;
     private AuthenticationFailureHandler smsCodeLoginFailureHandler;
     private SmsCodeService smsCodeLoginSmsCodeVerificationTokenService;
@@ -83,19 +84,26 @@ public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .antMatchers("/sign-up", "/sign-up/**").permitAll();
 
         String formLoginProcessingUrl = authenticationProperties.getFormLogin().getProcessingUrl();
+
+        AuthenticationSuccessHandler delegateFormLoginSuccessHandler
+                = new FormLoginSuccessHandler(formLoginAttemptsLimiter, this.formLoginSuccessHandler);
+
+        AuthenticationFailureHandler delegateFormLoginFailureHandler
+                = new FormLoginFailureHandler(formLoginAttemptsLimiter, formLoginAttemptsLimitHandler, formLoginFailureHandler);
+
         http.formLogin()
                 .loginProcessingUrl(formLoginProcessingUrl)
-                .successHandler(formLoginSuccessHandler)
-                .failureHandler(formLoginFailureHandler);
+                .successHandler(delegateFormLoginSuccessHandler)
+                .failureHandler(delegateFormLoginFailureHandler);
 
         enableFormLoginRequestVerification(http);
 
 
-        String formLoginAttemptsFailureUrl = authenticationProperties.getFormLogin().getAttemptsLimit().getAttemptsFailureUrl();
+
         getOrApplyFormLoginAttemptsLimitConfigurer(http)
                 .formLoginProcessingRequestMatcher(new AntPathRequestMatcher(formLoginProcessingUrl, "POST"))
                 .attemptsLimiter(formLoginAttemptsLimiter)
-                .attemptsFailureUrl(formLoginAttemptsFailureUrl);
+                .attemptsLimitHandler(formLoginAttemptsLimitHandler);
 
         String smsCodeLoginProcessingUrl = authenticationProperties.getSmsCodeLogin().getProcessingUrl();
         getOrApplySmsCodeLoginConfigurer(http)
@@ -111,7 +119,6 @@ public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
                         formLoginProcessingUrl,
                         authenticationProperties.getFormLogin().getDefaultTargetUrl(),
                         authenticationProperties.getFormLogin().getFailureUrl(),
-                        formLoginAttemptsFailureUrl,
                         smsCodeLoginProcessingUrl,
                         authenticationProperties.getSmsCodeLogin().getDefaultTargetUrl(),
                         authenticationProperties.getSmsCodeLogin().getFailureUrl()
