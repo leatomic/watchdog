@@ -15,6 +15,7 @@ import io.watchdog.security.web.verification.sms.SmsCode;
 import io.watchdog.security.web.verification.sms.SmsCodeService;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+@Order(99)
 @Getter @Setter
 public class CoreWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 

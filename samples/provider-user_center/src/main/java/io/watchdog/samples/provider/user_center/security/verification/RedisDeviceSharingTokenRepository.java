@@ -1,5 +1,7 @@
-package io.watchdog.security.verification;
+package io.watchdog.samples.provider.user_center.security.verification;
 
+import io.watchdog.security.verification.TokenRepository;
+import io.watchdog.security.verification.VerificationToken;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 

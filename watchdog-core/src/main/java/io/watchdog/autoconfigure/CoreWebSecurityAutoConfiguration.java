@@ -7,7 +7,7 @@ import io.watchdog.security.config.annotation.web.configurers.VerificationFilter
 import io.watchdog.security.verification.TokenRepository;
 import io.watchdog.security.verification.TokenService;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;
-import io.watchdog.security.web.authentication.RedisFormLoginAttemptsLimiter;
+import io.watchdog.security.web.authentication.InMemoryFormLoginAttemptsLimiter;
 import io.watchdog.security.web.verification.TokenWriter;
 import io.watchdog.security.web.verification.VerificationProvider;
 import io.watchdog.security.web.verification.VerificationService;
@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -54,25 +53,33 @@ public class CoreWebSecurityAutoConfiguration {
 
     // ~ form login
     // =================================================================================================================
+
+
+
     @Bean
-    @ConditionalOnMissingBean(name = "formLoginAttemptsLimiter")
-    public FormLoginAttemptsLimiter formLoginAttemptsLimiter(RedisTemplate<String, Long> longRedisTemplate, AuthenticationProperties authenticationProperties) {
+    @ConditionalOnMissingBean
+    public FormLoginAttemptsLimiter inMemoryFormLoginAttemptsLimiter(AuthenticationProperties authenticationProperties) {
+
+        log.warn("no FormLoginAttemptsLimiter configured, using InMemoryFormLoginAttemptsLimiter...");
 
         AuthenticationProperties.FormLogin.AttemptsLimit attemptsLimitProperties = authenticationProperties.getFormLogin().getAttemptsLimit();
-        return new RedisFormLoginAttemptsLimiter(longRedisTemplate, attemptsLimitProperties.getWarningFailureAttempts(), attemptsLimitProperties.getMaximumFailureAttempts());
+        long warningFailureAttempts = attemptsLimitProperties.getWarningFailureAttempts();
+        long maximumFailureAttempts = attemptsLimitProperties.getMaximumFailureAttempts();
+
+        return new InMemoryFormLoginAttemptsLimiter(warningFailureAttempts, maximumFailureAttempts);
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "formLoginRequestVerificationTokenService")
+    @ConditionalOnMissingBean(name = BeanIds.FORM_LOGIN_REQUEST_VERIFICATION_TOKEN_SERVICE)
     public TokenService formLoginRequestVerificationTokenService(ImageCodeService imageCodeService) {
         return imageCodeService;
     }
 
+
     // ~ sms code login
     // =================================================================================================================
-
     @Bean
-    @ConditionalOnMissingBean(name = "smsCodeLoginSmsCodeVerificationTokenService")
+    @ConditionalOnMissingBean(name = BeanIds.SMS_CODE_LOGIN_REQUEST_VERIFICATION_TOKEN_SERVICE)
     public SmsCodeService smsCodeLoginSmsCodeVerificationTokenService(SmsCodeService smsCodeService) {
         return smsCodeService;
     }
@@ -137,7 +144,7 @@ public class CoreWebSecurityAutoConfiguration {
         @Bean(BeanIds.SMS_CODE_SENDER)
         @ConditionalOnMissingBean(name = BeanIds.SMS_CODE_SENDER)
         public TokenWriter<SmsCode> smsCodeWriter() {
-            log.warn("SmsCodeSender was not configured, using SmsCodeConsoleWriter...");
+            log.warn("no SmsCodeSender configured, using SmsCodeConsoleWriter...");
             return new SmsCodeConsoleWriter();
         }
 

@@ -1,12 +1,8 @@
 package io.watchdog.security.web.authentication;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter @Setter
 public abstract class FormLoginAttemptsLimiter {
-    private long warningFailureAttempts;
-    private long maximumFailureAttempts;
+    protected long warningFailureAttempts;
+    protected long maximumFailureAttempts;
 
     public FormLoginAttemptsLimiter(long warningFailureAttempts, long maximumFailureAttempts) {
         this.warningFailureAttempts = warningFailureAttempts;
