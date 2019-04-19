@@ -22,6 +22,7 @@ public abstract class UsernameAttributeAuthenticationProvider<T extends Username
 
     private final Logger logger = LoggerFactory.getLogger(UsernameAttributeAuthenticationProvider.class);
 
+    @SuppressWarnings("unchecked")
     private Class<T> tokenClass = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 
     private UserDetailsChecker authenticationChecks = new DefaultAuthenticationChecks();

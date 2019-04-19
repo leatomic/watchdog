@@ -30,7 +30,7 @@ public class FormLoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
 
-        attemptsLimiter.clearFailures(new FormLoginDetails(request));
+        attemptsLimiter.clearNumberOfFailureTimes(new FormLoginDetails(request));
 
         // enables the next formLogin login request to run without token verification
         WebUtils.setSessionAttribute(request, WebAttributes.FORM_LOGIN_REQUIRES_VERIFICATION_TOKEN, null);

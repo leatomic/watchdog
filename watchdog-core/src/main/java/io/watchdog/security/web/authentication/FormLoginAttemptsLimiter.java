@@ -1,61 +1,63 @@
 package io.watchdog.security.web.authentication;
 
 public abstract class FormLoginAttemptsLimiter {
-    protected long warningFailureAttempts;
-    protected long maximumFailureAttempts;
+    protected long warningThreshold;
+    protected long maximum;
 
-    public FormLoginAttemptsLimiter(long warningFailureAttempts, long maximumFailureAttempts) {
-        this.warningFailureAttempts = warningFailureAttempts;
-        this.maximumFailureAttempts = maximumFailureAttempts;
+    public FormLoginAttemptsLimiter(long warningThreshold, long maximum) {
+        this.warningThreshold = warningThreshold;
+        this.maximum = maximum;
     }
 
 
-
-
+    /**
+     * 检查此次来自指定{IP, Username}的登录请求的尝试是否是允许的
+     * @return 若之前失败次数已超过允许的最大值则返回false，否则返回true
+     */
     public boolean checkAttempt(Object details) {
-        return !neverAgain(getFailures(details));
+        return !neverAgain(getNumberOfFailureTimes(details));
     }
 
-    protected abstract long getFailures(Object details);
+    protected abstract long getNumberOfFailureTimes(Object details);
 
 
 
 
 
     public Feedback recordFailure(Object details) {
-        long failureAttempts = incrementFailure(details);
-        return this.new Feedback(failureAttempts);
+        long numberOfFailureTimes = incrementNumberOfTimes(details);
+        return this.new Feedback(numberOfFailureTimes);
     }
 
-    protected abstract long incrementFailure(Object details);
+    protected abstract long incrementNumberOfTimes(Object details);
 
 
 
 
 
-    public abstract void clearFailures(Object details);
+    public abstract void clearNumberOfFailureTimes(Object details);
 
 
 
 
-    private boolean warning(long failureAttempts) {
-        return failureAttempts >= warningFailureAttempts;
+    private boolean warning(long numberOfFailureTimes) {
+        return numberOfFailureTimes >= warningThreshold;
     }
 
-    private boolean neverAgain(long failureAttempts) {
-        return failureAttempts >= maximumFailureAttempts;
+    private boolean neverAgain(long numberOfFailureTimes) {
+        return numberOfFailureTimes >= maximum;
     }
 
     public class Feedback {
-        private long failureAttempts;
-        public Feedback(long failureAttempts) {
-            this.failureAttempts = failureAttempts;
+        private long numberOfFailureTimes;
+        public Feedback(long numberOfFailureTimes) {
+            this.numberOfFailureTimes = numberOfFailureTimes;
         }
         public boolean warning() {
-            return FormLoginAttemptsLimiter.this.warning(failureAttempts);
+            return FormLoginAttemptsLimiter.this.warning(numberOfFailureTimes);
         }
         public boolean neverAgain() {
-            return FormLoginAttemptsLimiter.this.neverAgain(failureAttempts);
+            return FormLoginAttemptsLimiter.this.neverAgain(numberOfFailureTimes);
         }
     }
 

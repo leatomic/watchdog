@@ -1,6 +1,5 @@
 package io.watchdog.security.authentication.provider.endpoint;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,9 +10,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class FormLoginAttemptsLimitedPageController {
 
-    @GetMapping("${watchdog.authentication.form-login.attempts-limit.attempts-failure-url:/form-login.attempt-limited}")
+    @GetMapping("${watchdog.authentication.form-login.attempts-limit.attempt-limited-url:/form-login.attempt-limited}")
     @ResponseBody
     public ResponseEntity attemptFailure() {
         return ResponseEntity.ok("You've tried form login too many times");
     }
+
 }

@@ -1,11 +1,10 @@
 package io.watchdog.security.authentication.provider.endpoint;
 
-import io.watchdog.autoconfigure.properties.AuthenticationProperties;
 import io.watchdog.security.web.authentication.RequiresVerificationFormLoginRequestMatcher;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -33,8 +32,6 @@ import java.util.function.Function;
 @RequestMapping("${watchdog.authentication.login-page-url:/login}")
 public class DefaultLoginPageController {
 
-    private AuthenticationProperties properties;
-
     private Function<HttpServletRequest, Map<String, String>> resolveHiddenInputs = request -> {
         CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         if(token == null) {
@@ -42,11 +39,6 @@ public class DefaultLoginPageController {
         }
         return Collections.singletonMap(token.getParameterName(), token.getToken());
     };
-
-    @Autowired
-    public DefaultLoginPageController(AuthenticationProperties properties) {
-        this.properties = properties;
-    }
 
     @GetMapping
     @ResponseBody
@@ -91,24 +83,38 @@ public class DefaultLoginPageController {
         return attributes;
     }
 
+    @Value("${watchdog.authentication.form-login.enabled}")
+    private boolean formLoginEnabled;
+    @Value("${watchdog.authentication.form-login.username-parameter}")
+    private String formLoginUsernameParameter;
+    @Value("${watchdog.authentication.form-login.password-parameter}")
+    private String formLoginPasswordParameter;
+    @Value("${watchdog.authentication.form-login.verification.token-type}")
+    private String formLoginVerificationTokenType;
+    @Value("${watchdog.authentication.form-login.verification.token-parameter}")
+    private String formLoginVerificationTokenParameter;
+    @Value("${watchdog.authentication.form-login.remember-me-parameter}")
+    private String formLoginRememberMeParameter;
+    @Value("${watchdog.authentication.form-login.processing-url}")
+    private String formLoginProcessingUrl;
+
+
     private void setFormLoginIfEnabled(Map<String, Object> attributesMap, HttpServletRequest request) {
 
-        if (properties.getFormLogin().isEnabled()) {
+        if (formLoginEnabled) {
 
             FormLogin formLogin = new FormLogin();
             attributesMap.put("formLogin", formLogin);
 
-            AuthenticationProperties.FormLogin formLoginProperties = properties.getFormLogin();
-
-            formLogin.usernameParameter = formLoginProperties.getUsernameParameter();
-            formLogin.passwordParameter = formLoginProperties.getPasswordParameter();
+            formLogin.usernameParameter = formLoginUsernameParameter;
+            formLogin.passwordParameter = formLoginPasswordParameter;
             if (requiresFormLoginVerification(request)) {
                 formLogin.verification = new FormLogin.Verification();
-                formLogin.verification.tokenType = formLoginProperties.getVerification().getTokenType();
-                formLogin.verification.tokenParameter = formLoginProperties.getVerification().getTokenParameter();
+                formLogin.verification.tokenType = formLoginVerificationTokenType;
+                formLogin.verification.tokenParameter = formLoginVerificationTokenParameter;
             }
-            formLogin.rememberMeParameter = formLoginProperties.getRememberMeParameter();
-            formLogin.processingUrl = formLoginProperties.getProcessingUrl();
+            formLogin.rememberMeParameter = formLoginRememberMeParameter;
+            formLogin.processingUrl = formLoginProcessingUrl;
         }
     }
 
@@ -116,19 +122,27 @@ public class DefaultLoginPageController {
         return RequiresVerificationFormLoginRequestMatcher.requiresVerification(request);
     }
 
+    @Value("${watchdog.authentication.sms-code-login.enabled}")
+    private boolean smsCodeLoginEnabled;
+    @Value("${watchdog.authentication.sms-code-login.verification.token-type}")
+    private String smsCodeLoginVerificationTokenType;
+    @Value("${watchdog.authentication.sms-code-login.verification.mobile-parameter}")
+    private String smsCodeLoginVerificationMobileParameter;
+    @Value("${watchdog.authentication.sms-code-login.verification.token-parameter}")
+    private String smsCodeLoginVerificationTokenParameter;
+    @Value("${watchdog.authentication.sms-code-login.processing-url}")
+    private String smsCodeLoginProcessingUrl;
 
     private void setSmsCodeLoginIfEnabled(Map<String, Object> attributesMap, HttpServletRequest request) {
 
-        if (properties.getSmsCodeLogin().isEnabled()) {
+        if (smsCodeLoginEnabled) {
             SmsCodeLogin smsCodeLogin = new SmsCodeLogin();
             attributesMap.put("smsCodeLogin", smsCodeLogin);
 
-            AuthenticationProperties.SmsCodeLogin smsCodeLoginProperties = properties.getSmsCodeLogin();
-
-            smsCodeLogin.smsCodeTokenTypeParameter = smsCodeLoginProperties.getVerification().getTokenType();
-            smsCodeLogin.toMobileParameter = smsCodeLoginProperties.getVerification().getMobileParameter();
-            smsCodeLogin.smsCodeParameter = smsCodeLoginProperties.getVerification().getTokenParameter();
-            smsCodeLogin.processingUrl = smsCodeLoginProperties.getProcessingUrl();
+            smsCodeLogin.smsCodeTokenTypeParameter = smsCodeLoginVerificationTokenType;
+            smsCodeLogin.toMobileParameter = smsCodeLoginVerificationMobileParameter;
+            smsCodeLogin.smsCodeParameter = smsCodeLoginVerificationTokenParameter;
+            smsCodeLogin.processingUrl = smsCodeLoginProcessingUrl;
         }
     }
 

@@ -1,0 +1,22 @@
+plugins {
+    id "net.ltgt.apt" version "0.21"
+    id "net.ltgt.apt-idea" version "0.21"
+}
+
+apply plugin: 'idea'
+
+dependencies {
+
+    implementation project(':watchdog-browser-starter-spring-boot')
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "com.querydsl:querydsl-jpa:4.1.4"
+    compileOnly "com.querydsl:querydsl-apt:4.1.4:jpa"
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+
+}

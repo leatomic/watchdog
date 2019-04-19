@@ -13,7 +13,8 @@ ext {
     junitJupiterVersion = '5.2.0'
 }
 
-def javaLibraries = [project(':watchdog-core'), project(':watchdog-browser'), project(':watchdog-native')]
+def javaLibraries = [project(':watchdog-core'), project(':watchdog-browser'), project(':watchdog-native'), 
+                     project(':watchdog-browser-starter-spring-boot')]
 def emptyProjects = [project(':samples')]
 def bootProjects = subprojects - javaLibraries - emptyProjects
 
@@ -55,14 +56,14 @@ configure(subprojects - emptyProjects) {
     }
     dependencies {
         compileOnly "org.projectlombok:lombok:${this.lombokVersion}"
-        compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+        
         testImplementation "org.junit.jupiter:junit-jupiter-api:${this.junitJupiterVersion}"
         testImplementation "org.junit.jupiter:junit-jupiter-params:${this.junitJupiterVersion}"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${this.junitJupiterVersion}"
         testImplementation ("org.springframework.boot:spring-boot-starter-test") {
             exclude module: 'junit'
         }
-        testImplementation 'org.springframework.security:spring-security-test'
+        
         implementation 'org.apache.commons:commons-lang3:3.8'
         implementation 'org.apache.commons:commons-collections4:4.2'
         implementation 'commons-beanutils:commons-beanutils:1.9.3'

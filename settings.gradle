@@ -1,6 +1,9 @@
 rootProject.name = 'watchdog'
 
-include 'watchdog-core', 'watchdog-browser', 'watchdog-native', 'samples:provider-user_center'
+include 'watchdog-core'
+include 'watchdog-browser', 'watchdog-browser-starter-spring-boot'
+include 'watchdog-native'
+include 'samples:user_center'
 
 rootProject.children.each { project ->
     if (project.name == 'samples') {
