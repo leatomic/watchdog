@@ -1,20 +1,22 @@
 plugins {
-    id "net.ltgt.apt" version "0.21"
+    // get IntelliJ IDEA to recognize the generated codes(mark generated source root)
     id "net.ltgt.apt-idea" version "0.21"
 }
-
-apply plugin: 'idea'
 
 dependencies {
 
     implementation project(':watchdog-browser-starter-spring-boot')
 
+
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    implementation 'com.h2database:h2'
+
+    runtimeOnly 'com.h2database:h2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation "com.querydsl:querydsl-jpa:4.1.4"
-    compileOnly "com.querydsl:querydsl-apt:4.1.4:jpa"
+    annotationProcessor     'com.querydsl:querydsl-apt:4.1.4:jpa'
+    // needed because the QueryDSL annotation processor doesn't recognize javax.persistence.Entity
+    annotationProcessor     'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation  'com.querydsl:querydsl-jpa:4.1.4'
 
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'

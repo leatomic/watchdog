@@ -41,7 +41,7 @@ public class SmsCodeService extends GeneralTokenService<SmsCode> {
     private String generateCodeSeq(int length) {
         final Random random = new Random();
         char[] seq = new char[length];
-        char[] codes = { 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G',
+        char[] codes = { 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'F', 'g', 'G',
                 'h', 'H', 'i', 'j', 'J', 'k', 'K', 'L', 'm', 'M', 'n', 'N', 'p', 'P',
                 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', 'u', 'U', 'v', 'V', 'w', 'W',
                 'x', 'X', 'y', 'Y', 'z', 'Z',
