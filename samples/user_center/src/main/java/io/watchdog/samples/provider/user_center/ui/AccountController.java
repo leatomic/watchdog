@@ -52,29 +52,29 @@ public class AccountController {
         return ResponseEntity.ok(account);
     }
 
-//    @GetMapping("/sign-up/with-phone/phone.unused")
+//    @GetMapping("/sign-up/with-mobilePhone/mobilePhone.unused")
 //    @ResponseBody
-//    public ResponseEntity<?> checkPhoneUnused(@RequestParam("phone") @Valid @MobilePhone String phone) {
-//        boolean unused = !service.detectPhone(phone);
+//    public ResponseEntity<?> checkPhoneUnused(@RequestParam("mobilePhone") @Valid @MobilePhone String mobilePhone) {
+//        boolean unused = !service.detectPhone(mobilePhone);
 //        SimpleResponseBody result = unused
-//                ? new SimpleResponseBody("phone.unused", null, null)
-//                : new SimpleResponseBody("duplicated-phone", "该手机号码已被用于注册，无法用于注册新帐号", null);
+//                ? new SimpleResponseBody("mobilePhone.unused", null, null)
+//                : new SimpleResponseBody("duplicated-mobilePhone", "该手机号码已被用于注册，无法用于注册新帐号", null);
 //        return ResponseEntity.ok(result);
 //    }
 //
-//    @PostMapping("/sign-up/with-phone.do")
+//    @PostMapping("/sign-up/with-mobilePhone.do")
 //    @ResponseBody
 //    public ResponseEntity<?> doSignUpAfterSmsCodeVerified(HttpServletRequest request) {
 //
-//        String phone = (String) request.getAttribute(WebAttributes.PHONE_OF_SMS_CODE_VERIFIED);
+//        String mobilePhone = (String) request.getAttribute(WebAttributes.PHONE_OF_SMS_CODE_VERIFIED);
 //
 //        if (log.isDebugEnabled()) {
-//            log.debug("try to sign up with phone: " + phone);
+//            log.debug("try to sign up with mobilePhone: " + mobilePhone);
 //        }
 //
-//        service.create(new AccountCreation.WithPhone(phone));
+//        service.create(new AccountCreation.WithPhone(mobilePhone));
 //
-//        doSignInAfterSignUpSucceed(new MobilePhoneAttributeAuthenticationToken(phone), request);
+//        doSignInAfterSignUpSucceed(new MobilePhoneAttributeAuthenticationToken(mobilePhone), request);
 //
 //        return ResponseEntity.created(URI.create("/members/me")).build();
 //

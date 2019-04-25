@@ -1,91 +1,63 @@
 package io.watchdog.security.web.authentication;
 
-import io.watchdog.util.Durations;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import java.time.Duration;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
-public class InMemoryFormLoginAttemptsLimiter extends FormLoginAttemptsLimiter implements InitializingBean, DisposableBean {
+public class InMemoryFormLoginAttemptsLimiter extends FormLoginAttemptsLimiter {
 
-    private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-    private ConcurrentHashMap<String, AtomicLong> failureAttemptsMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Long> detailsFailedAttemptsMap;
 
-    public InMemoryFormLoginAttemptsLimiter(long warningFailureAttempts, long maximumFailureAttempts) {
-        super(warningFailureAttempts, maximumFailureAttempts);
+    public InMemoryFormLoginAttemptsLimiter(long warningThreshold, long maximum,
+                                            Duration howLongWillLoginBeDisabled) {
+        super(warningThreshold, maximum, howLongWillLoginBeDisabled);
+        detailsFailedAttemptsMap = CacheBuilder.newBuilder()
+                                            .expireAfterWrite(howLongWillLoginBeDisabled)
+                                            .<String, Long>build().asMap();
     }
 
 
     @Override
     protected long getNumberOfFailureTimes(Object details) {
-        String key = parseKey(details);
-        AtomicLong failureAttempts = failureAttemptsMap.get(key);
-        return failureAttempts == null ? 0 : failureAttempts.get();
+        Long aLong = detailsFailedAttemptsMap.get(assembleKey(details));
+        return aLong == null ? 0 : aLong;
     }
 
     @Override
-    protected long incrementNumberOfTimes(Object details) {
-        String key = parseKey(details);
-        AtomicLong failureAttempts = failureAttemptsMap.computeIfAbsent(key, k -> new AtomicLong());
-        return failureAttempts.addAndGet(1);
+    protected long incrementNumberOfFailureTimes(Object details) {
+        return detailsFailedAttemptsMap.merge(assembleKey(details), 1L, Long::sum);
     }
 
     @Override
     public void clearNumberOfFailureTimes(Object details) {
-        failureAttemptsMap.remove(parseKey(details));
+        detailsFailedAttemptsMap.remove(assembleKey(details));
     }
 
 
-
-
-
-
-
-    private String parseKey(Object details) {
+    private String assembleKey(Object details) {
         FormLoginDetails details1 = (FormLoginDetails)details;
         return details1.getRemoteIpAddress() + ":" + details1.getUsername();
     }
 
 
-
-
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Runnable clearAttemptsTask = () -> {
-            log.info("clear InMemoryFormLoginAttemptsLimiter#failureAttemptsMap...");
-            failureAttemptsMap.clear();
-            log.info("clear InMemoryFormLoginAttemptsLimiter#failureAttemptsMap completed");
-        };
-        long initialDelay = Durations.fromNowToNextLocalTime(6, 0, 0, 0).getSeconds();
-        long period = TimeUnit.DAYS.toSeconds(1);
-        service.scheduleAtFixedRate(clearAttemptsTask, initialDelay, period, TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        log.info("shutting down InMemoryFormLoginAttemptsLimiter#service(ScheduledExecutorService)...");
-        service.shutdown();
-        failureAttemptsMap.clear();
-        service = null;
-        log.info("shutdown InMemoryFormLoginAttemptsLimiter#service(ScheduledExecutorService) completed");
-    }
-
     // ~ Getters
     // =================================================================================================================
-    public ScheduledExecutorService getService() {
-        return service;
+    @Override
+    public void setHowLongWillLoginBeDisabled(Duration howLongWillLoginBeDisabled) {
+        super.setHowLongWillLoginBeDisabled(howLongWillLoginBeDisabled);
+        detailsFailedAttemptsMap = CacheBuilder.newBuilder()
+                                        .expireAfterWrite(howLongWillLoginBeDisabled)
+                                        .<String, Long>removalListener(
+                                            notification -> detailsFailedAttemptsMap.remove(notification.getKey())
+                                        )
+                                        .build(
+                                            CacheLoader.from((String key)-> detailsFailedAttemptsMap.get(key))
+                                        )
+                                        .asMap();
     }
-
-    public ConcurrentHashMap<String, AtomicLong> getFailureAttemptsMap() {
-        return failureAttemptsMap;
-    }
-
 
 }

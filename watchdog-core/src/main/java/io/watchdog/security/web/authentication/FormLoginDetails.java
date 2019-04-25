@@ -16,6 +16,7 @@ public class FormLoginDetails {
         this.username = username;
     }
 
+    // TODO 使用适配器来适配该接口
     public FormLoginDetails(HttpServletRequest request) {
         remoteIpAddress = request.getRemoteAddr();
         username = request.getParameter("username");

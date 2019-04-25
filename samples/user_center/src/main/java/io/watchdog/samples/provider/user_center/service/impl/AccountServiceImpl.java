@@ -76,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
             who = accountPO.email.eq(username);
         }
         else if (mobilePhoneValidator.isValid(username, null)) {
-            who = accountPO.phone.eq(username);
+            who = accountPO.mobilePhone.eq(username);
         }
         else who = accountPO.username.eq(username);
 
@@ -86,9 +86,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Optional<Account> findByMobilePhone(String mobile) {
         if (log.isDebugEnabled()) {
-            log.debug("find account with mobile phone:{}", mobile);
+            log.debug("find account with mobile mobilePhone:{}", mobile);
         }
-        return accountRepository.findOne(accountPO.phone.eq(mobile));
+        return accountRepository.findOne(accountPO.mobilePhone.eq(mobile));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public boolean detectPhone(String phone) {
-        return accountRepository.exists(accountPO.phone.eq(phone));
+        return accountRepository.exists(accountPO.mobilePhone.eq(phone));
     }
 
     @Override

@@ -1,11 +1,9 @@
 package io.watchdog.samples.provider.user_center.domain.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.watchdog.samples.provider.user_center.infrastructure.security.authentication.CredentialsExpirationPolicy;
+import io.watchdog.samples.provider.user_center.infra.security.authentication.CredentialsExpirationPolicy;
 import io.watchdog.util.Durations;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Duration;
@@ -20,16 +18,14 @@ public class Account {
     private String username;
     private Profile profile;
     private Associations associations;
-    @JsonIgnore
-    private Password password;
+    private @JsonIgnore Password password;
 
     private LocalDateTime expirationTime;
     private boolean locked;
     private boolean enabled = true;
     private final LocalDateTime registrationTime;
 
-    @JsonIgnore
-    private final transient Factory factory;
+    private final transient @JsonIgnore Factory factory;
 
     // ~Constructor for create new one
     Account(String username, Factory factory) {
@@ -39,7 +35,7 @@ public class Account {
         this.factory = factory;
     }
 
-    // ~Constructor for rebuild of persisted
+    // ~Constructor for rebuild from persistent data
     Account(Long id, String username,
             Profile profile,
             Associations associations,
@@ -76,7 +72,7 @@ public class Account {
         confirmEnabled();
         confirmNotExpired();
         confirmNotLocked();
-        this.associations.setPhone(phone);
+        this.associations.setMobilePhone(phone);
     }
 
     public void bindEmail(String email) {
@@ -213,6 +209,54 @@ public class Account {
         }
     }
 
+
+
+    @Data @AllArgsConstructor
+    public static class Profile {
+
+        private String avatar;      // 头像（图片的url）
+        private String bio;         // 个人简介
+        private Gender gender;      // 性别，默认是为公开的
+        private LocalDate birthday; // 生日
+    }
+
+    public enum Gender {
+        PRIVATE,             // 未公开的
+        MALE,                // 男性的
+        FEMALE;              // 女性的
+        // ...其他的
+    }
+
+    @Data @AllArgsConstructor
+    public static class Password {
+
+        private String seq;                         //  密码串
+        private LocalDateTime expirationTime;       //  密码到期时间，为null表示永不过期
+        private LocalDate lastModified;             //  上次修改的时间，默认为密码初始化时间
+        public boolean isExpired() {
+            return expirationTime != null && expirationTime.isBefore(LocalDateTime.now());
+        }
+    }
+
+    @Data @AllArgsConstructor
+    public static class Associations {
+        private String mobilePhone; // 绑定的手机号码
+        private String email;       // 绑定的邮箱
+    }
+
+
+    /**
+     * <p>Account实体对象的工厂类
+     * <br>
+     * <br>
+     *
+     * <p>主要职责：
+     * <ul>
+     *  <li>创建新的Account对象</li>
+     *  <li>根据从仓储中取得的持久化数据来重建Account对象</li>
+     * </ul>
+     * <p/>
+     */
     @Getter @Setter
     public static class Factory {
 
@@ -296,6 +340,5 @@ public class Account {
 
         }
     }
-
 }
 

@@ -1,45 +1,26 @@
 package io.watchdog.security.web.verification.image;
 
 import io.watchdog.security.verification.GeneralTokenService;
-import io.watchdog.security.verification.TokenRepository;
 
-import java.time.Duration;
-import java.util.Map;
 import java.util.Random;
 
-public class ImageCodeService extends GeneralTokenService<ImageCode> {
+public class ImageCodeService extends GeneralTokenService<ImageCodeTokenRequest, ImageCode> {
 
-    private int defaultImageWidth, defaultImageHeight;
 
     protected final Random random = new Random();
 
-    public ImageCodeService(int codeLength,
-                            Duration codeValidityDuration,
-                            TokenRepository<ImageCode> tokenRepository,
-                            int defaultImageWidth, int defaultImageHeight) {
-        super(codeLength, codeValidityDuration, tokenRepository);
-        this.defaultImageWidth = defaultImageWidth;
-        this.defaultImageHeight = defaultImageHeight;
-    }
-
     @Override
-    public ImageCode createToken(Map<String, String[]> params) {
+    public ImageCode allocate(ImageCodeTokenRequest request) {
 
-        String seq = generateCodeSeq(getCodeLength());
+        String seq = generateCodeSeq(request.getCodeLength());
 
-        String[]    strings = params.get("image-width");
-        int imageWidth  = (strings != null && strings.length > 0) ? Integer.parseInt(strings[0]) : defaultImageWidth;
-
-                    strings = params.get("image-height");
-        int imageHeight = (strings != null && strings.length > 0) ? Integer.parseInt(strings[0]) : defaultImageHeight;
-
-        return new ImageCode(seq, getCodeValidityDuration(), imageWidth, imageHeight);
+        return new ImageCode(seq, request.getCodeValidityDuration(), request.getImageWidth(), request.getImageHeight());
 
     }
 
     private  String generateCodeSeq(int length) {
         char[] seq = new char[length];
-        char[] codes = { 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G',
+        char[] codes = {  'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G',
                 'h', 'H', 'i', 'j', 'J', 'k', 'K', 'L', 'm', 'M', 'n', 'N', 'p', 'P',
                 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', 'u', 'U', 'v', 'V', 'w', 'W',
                 'x', 'X', 'y', 'Y', 'z', 'Z',

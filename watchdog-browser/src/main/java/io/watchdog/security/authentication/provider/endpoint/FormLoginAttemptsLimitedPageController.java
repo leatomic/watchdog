@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class FormLoginAttemptsLimitedPageController {
 
-    @GetMapping("${watchdog.authentication.form-login.attempts-limit.attempt-limited-url:/form-login.attempt-limited}")
+    @GetMapping("${watchdog.authentication.form-login.attempts-limit.login-disabled-url:/form-login.disabled}")
     @ResponseBody
     public ResponseEntity attemptFailure() {
         return ResponseEntity.ok("You've tried form login too many times");

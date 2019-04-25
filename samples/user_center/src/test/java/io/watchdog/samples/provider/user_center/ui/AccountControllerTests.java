@@ -29,23 +29,23 @@ public class AccountControllerTests {
 //    @Test
 //    void whenDetectPhoneWithUnavailable_thenReturnOkAnd() throws Exception {
 //        mockMvc.perform(
-//                get("/sign-up/phone/phone.available")
-//                        .param("phone", "13570666666")
+//                get("/sign-up/mobilePhone/mobilePhone.available")
+//                        .param("mobilePhone", "13570666666")
 //                        .contentType(MediaType.APPLICATION_JSON_UTF8)
 //        )
 //        .andExpect(status().isOk())
-//        .andExpect(content().json("{id:duplicated-phone, message:该手机号码已被用于注册，无法用于注册新帐号, content:null}"));
+//        .andExpect(content().json("{id:duplicated-mobilePhone, message:该手机号码已被用于注册，无法用于注册新帐号, content:null}"));
 //    }
 //
 //    @Test
 //    void whenDetectPhoneWithAvailable_thenReturnOkAnd() throws Exception {
 //        mockMvc.perform(
-//                get("/sign-up/phone/phone.available")
-//                        .param("phone", "13570666667")
+//                get("/sign-up/mobilePhone/mobilePhone.available")
+//                        .param("mobilePhone", "13570666667")
 //                        .contentType(MediaType.APPLICATION_JSON_UTF8)
 //        )
 //                .andExpect(status().isOk())
-//                .andExpect(content().json("{id:phone.available, message:null, content:null}"));
+//                .andExpect(content().json("{id:mobilePhone.available, message:null, content:null}"));
 //    }
 
 

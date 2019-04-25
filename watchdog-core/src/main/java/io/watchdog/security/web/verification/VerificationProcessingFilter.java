@@ -1,5 +1,6 @@
 package io.watchdog.security.web.verification;
 
+import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -16,7 +17,6 @@ public class VerificationProcessingFilter extends OncePerRequestFilter {
     private List<VerificationProvider> providers = new ArrayList<>();
 
     public VerificationProcessingFilter() {
-
     }
 
     public VerificationProcessingFilter(List<VerificationProvider> providers) {
@@ -24,7 +24,8 @@ public class VerificationProcessingFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         for (VerificationProvider provider : providers) {
@@ -37,16 +38,16 @@ public class VerificationProcessingFilter extends OncePerRequestFilter {
 
 
 
-    public List<VerificationProvider> getProviders() {
-        return providers;
-    }
-
     public void addProvider(VerificationProvider provider) {
         this.providers.add(Objects.requireNonNull(provider));
     }
 
     public void addProviders(List<VerificationProvider> providers) {
         this.providers.addAll(Objects.requireNonNull(providers));
+    }
+
+    public List<VerificationProvider> getProviders() {
+        return providers;
     }
 
 }

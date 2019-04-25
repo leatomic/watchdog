@@ -1,6 +1,7 @@
 package io.watchdog.security.config.annotation.web.configurers;
 
 import io.watchdog.security.web.verification.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
@@ -30,24 +31,27 @@ public class VerificationFiltersConfigurer<H extends HttpSecurityBuilder<H>>
     }
 
     @Override
-    public void configure(H http) throws Exception {
-        RequestMatcher acquiresTokenRequestMatcher              = tokenEndpoint.acquiresTokenRequestMatcher;
-        String tokenTypeParameter                               = tokenEndpoint.tokenTypeParameter;
-        List< VerificationService > services                    = tokenEndpoint.services;
-        VerificationServiceFailureHandler verificationServiceFailureHandler =
-                Objects.requireNonNull(tokenEndpoint.serviceFailureHandler, "VerificationServiceFailureHandler has not been configured");
+    public void configure(H http) {
 
-        VerificationTokenEndpointFilter tokenEndpointFilter = new VerificationTokenEndpointFilter(acquiresTokenRequestMatcher, tokenTypeParameter, services, verificationServiceFailureHandler);
+        VerificationTokenEndpointFilter tokenEndpointFilter = tokenEndpoint.createFilter();
         http.addFilterBefore(tokenEndpointFilter, AbstractPreAuthenticatedProcessingFilter.class);
 
-
-
-        List<VerificationProvider> providers      = processing.providers;
-
-        VerificationProcessingFilter processingFilter = new VerificationProcessingFilter();
-        processingFilter.addProviders(providers);
+        VerificationProcessingFilter processingFilter = processing.createFilter();
         http.addFilterBefore(postProcess(processingFilter), AbstractPreAuthenticatedProcessingFilter.class);
+
     }
+
+
+
+
+
+
+
+
+
+    // Registry classes
+    // =================================================================================================================
+
 
     /**
      * 配置过滤器{@link VerificationProcessingFilter}的配置项
@@ -74,18 +78,28 @@ public class VerificationFiltersConfigurer<H extends HttpSecurityBuilder<H>>
             return VerificationFiltersConfigurer.this;
         }
 
+        private VerificationProcessingFilter createFilter() {
+            VerificationProcessingFilter processingFilter = new VerificationProcessingFilter();
+            processingFilter.addProviders(providers);
+            return processingFilter;
+        }
+
     }
+
+
+
+
+
 
 
     /**
      * 配置过滤器{@link VerificationTokenEndpointFilter}的配置项
      */
     public class TokenEndpointRegistry {
-
         private RequestMatcher acquiresTokenRequestMatcher;
         private String tokenTypeParameter;
-        private List< VerificationService > services = new ArrayList<>();
-        private VerificationServiceFailureHandler serviceFailureHandler;
+        private String businessParameter;
+        private List<VerificationRequestHandler> handlers = new ArrayList<>();
 
         public final VerificationFiltersConfigurer<H>.TokenEndpointRegistry acquiresTokenUrl(String acquiresTokenUrl) {
             this.acquiresTokenRequestMatcher = new AntPathRequestMatcher(acquiresTokenUrl, "GET");
@@ -97,22 +111,40 @@ public class VerificationFiltersConfigurer<H extends HttpSecurityBuilder<H>>
             return this;
         }
 
-        public final VerificationFiltersConfigurer<H>.TokenEndpointRegistry addServices(Collection<VerificationService> services) {
-            boolean hasServices = services != null && !services.isEmpty();
-            if (hasServices) {
-                for (VerificationService service : services)
-                    this.services.add(Objects.requireNonNull(service));
-            }
+        public final VerificationFiltersConfigurer<H>.TokenEndpointRegistry businessParameter(String businessParameter) {
+            this.businessParameter = businessParameter;
             return this;
         }
 
-        public final VerificationFiltersConfigurer<H>.TokenEndpointRegistry serviceFailureHandler(VerificationServiceFailureHandler serviceFailureHandler) {
-            this.serviceFailureHandler = serviceFailureHandler;
+        public final VerificationFiltersConfigurer<H>.TokenEndpointRegistry applyRequestHandler(VerificationRequestHandler handler) {
+            this.handlers.add(Objects.requireNonNull(handler));
+            return this;
+        }
+
+        public final VerificationFiltersConfigurer<H>.TokenEndpointRegistry applyRequestHandlers(Collection<VerificationRequestHandler> handlers) {
+            boolean hasHandlers = handlers != null && !handlers.isEmpty();
+            if (hasHandlers) {
+                for (VerificationRequestHandler handler : handlers)
+                    this.handlers.add(Objects.requireNonNull(handler));
+            }
             return this;
         }
 
         public VerificationFiltersConfigurer<H> and() {
             return VerificationFiltersConfigurer.this;
+        }
+
+        private VerificationTokenEndpointFilter createFilter() {
+
+            VerificationTokenEndpointFilter tokenEndpointFilter = new VerificationTokenEndpointFilter(acquiresTokenRequestMatcher, handlers);
+
+            if (StringUtils.isNotBlank(tokenTypeParameter))
+                tokenEndpointFilter.setTokenTypeParameter(tokenTypeParameter);
+
+            if (StringUtils.isNotBlank(businessParameter))
+                tokenEndpointFilter.setBusinessParameter(businessParameter);
+
+            return tokenEndpointFilter;
         }
 
     }

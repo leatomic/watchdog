@@ -3,7 +3,7 @@ rootProject.name = 'watchdog'
 include 'watchdog-core'
 include 'watchdog-browser', 'watchdog-browser-starter-spring-boot'
 include 'watchdog-native'
-include 'samples:user_center'
+include 'samples:user_center', 'samples:form-login-attempt-limit', 'samples:sms_code-login'
 
 rootProject.children.each { project ->
     if (project.name == 'samples') {

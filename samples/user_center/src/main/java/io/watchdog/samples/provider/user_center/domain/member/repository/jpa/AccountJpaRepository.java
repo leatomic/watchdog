@@ -2,8 +2,8 @@ package io.watchdog.samples.provider.user_center.domain.member.repository.jpa;
 
 import io.watchdog.samples.provider.user_center.domain.member.Account;
 import io.watchdog.samples.provider.user_center.domain.member.repository.AccountRepository;
-import io.watchdog.samples.provider.user_center.infrastructure.repository.PersistentObjectRepository;
-import io.watchdog.samples.provider.user_center.infrastructure.repository.Translator;
+import io.watchdog.samples.provider.user_center.infra.repository.PersistentObjectRepository;
+import io.watchdog.samples.provider.user_center.infra.repository.Translator;
 
 import javax.annotation.Nonnull;
 

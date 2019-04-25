@@ -37,6 +37,12 @@ spring:
 
   thymeleaf.cache: false
 
+watchdog:
+  authentication:
+    form-login:
+      attempts-limit:
+        enabled: true
+
 ---
 #spring.profiles: prod
 #
@@ -51,4 +57,3 @@ spring:
 #    username: le
 #    password: 123456
 #  data.redis.repositories.enabled: false
-

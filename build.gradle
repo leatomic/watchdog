@@ -69,6 +69,7 @@ configure(subprojects - emptyProjects) {
         implementation 'org.apache.commons:commons-lang3:3.8'
         implementation 'org.apache.commons:commons-collections4:4.2'
         implementation 'commons-beanutils:commons-beanutils:1.9.3'
+        implementation 'com.google.guava:guava:27.1-jre'
     }
 
     test {

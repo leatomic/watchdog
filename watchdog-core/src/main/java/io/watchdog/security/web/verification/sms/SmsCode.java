@@ -16,8 +16,4 @@ public class SmsCode extends VerificationToken {
         this.forPhone = forPhone;
     }
 
-    public SmsCode(String key, int seconds, String forPhone) {
-        super(key, seconds);
-        this.forPhone = forPhone;
-    }
 }

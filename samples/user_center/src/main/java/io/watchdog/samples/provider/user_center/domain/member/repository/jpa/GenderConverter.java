@@ -1,6 +1,6 @@
 package io.watchdog.samples.provider.user_center.domain.member.repository.jpa;
 
-import io.watchdog.samples.provider.user_center.domain.member.Gender;
+import io.watchdog.samples.provider.user_center.domain.member.Account.Gender;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

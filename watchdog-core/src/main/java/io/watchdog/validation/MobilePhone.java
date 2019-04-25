@@ -24,6 +24,6 @@ public @interface MobilePhone {
 
     Class<? extends Payload>[] payload() default { };
 
-    String regexp() default ".*";
+    String regexp() default "^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0-2,5-9])|(177))\\d{8}$";
 
 }

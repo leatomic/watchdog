@@ -13,6 +13,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
 
+/**
+ * <p>默认提供的图片验证码图片输出器
+ * <p>负责将{@link ImageCode}转化成图片，并通过当前请求对应的{@link HttpServletResponse}的I/O输出到客户端</p>
+ */
 public class DefaultImageCodeWriter implements TokenWriter<ImageCode> {
 
     protected final Random random = new Random();
@@ -108,3 +112,4 @@ public class DefaultImageCodeWriter implements TokenWriter<ImageCode> {
     }
 
 }
+

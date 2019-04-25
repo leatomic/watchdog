@@ -1,11 +1,13 @@
 package io.watchdog.security.web.verification;
 
-import io.watchdog.security.verification.InternalTokenServiceException;
 import io.watchdog.security.verification.TokenServiceException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,29 +21,35 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
+/**
+ * <p>客户端获取验证码的请求的端点。那么，是如何为客户端提供服务的呢？
+ * <p>  统一的验证码获取url：/verification.token,
+ *      不同类型的验证码服务将根据参数type来区分，
+ *      然后同种类型不同业务的验证码服务将根据参数for来区分
+ * </p>
+ */
 @Slf4j
 @Getter @Setter
 public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
-
     private RequestMatcher acquiresTokenRequestMatcher;
-    private String tokenTypeParameter;
-    private List<VerificationService> services = new ArrayList<>();
-    private VerificationServiceFailureHandler failureHandler;
+    private String tokenTypeParameter = "type";
+    private String businessParameter = "for";
+    private ConcurrentMap<VerificationRequest.Type, VerificationRequestHandler> tokenRequestHandlerMap;
 
     public VerificationTokenEndpointFilter(RequestMatcher acquiresTokenRequestMatcher,
-                                           String tokenTypeParameter,
-                                           List<VerificationService> services,
-                                           VerificationServiceFailureHandler failureHandler) {
+                                           List<VerificationRequestHandler> handlers) {
+
         this.acquiresTokenRequestMatcher = acquiresTokenRequestMatcher;
-        this.tokenTypeParameter = tokenTypeParameter;
-        for (VerificationService service : services) {
-            applyVerificationService(service);
+
+        tokenRequestHandlerMap = new ConcurrentHashMap<>((int) Math.ceil(handlers.size()/0.75));
+        for (VerificationRequestHandler handler : handlers) {
+            VerificationRequest.Type supportsRequestType = handler.getService().getSupportsRequestType();
+            tokenRequestHandlerMap.put(supportsRequestType, handler);
         }
-        this.failureHandler = failureHandler;
     }
 
     /**
@@ -65,20 +73,24 @@ public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
      * <p>
      *     然而,
      * <ol>
-     *     <li>注册{@link RequestContextListener}将只能获取得到{@link HttpServletRequest}，
-     *     而无法获取到{@link HttpServletResponse}</li>
-     *     <li>注册{@link RequestContextFilter}则虽然能获取到{@link HttpServletResponse}，但其被注册在springSecurityFilterChain之后，因此我们无法及时获取到</li>
+     *     <li>注册{@link RequestContextListener}将只能获取得到{@link HttpServletRequest}，而无法获取到
+     *              {@link HttpServletResponse}
+     *     </li>
+     *     <li>注册{@link RequestContextFilter}则虽然能获取到{@link HttpServletResponse}，但其被注册在
+     *              springSecurityFilterChain之后，因此我们无法及时获取到
+     *     </li>
      *     <li>{@link DispatcherServlet}中注入的作用域则更靠后</li>
      * </ol>
      * <p>
-     *     因此，在此将预先额外初始化和后置地重置{@link RequestContextHolder#requestAttributesHolder}
+     *     因此，在此将预先额外初始化和后置地重置{@link RequestContextHolder#setRequestAttributes(RequestAttributes, boolean)}
      * </p>
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
         initRequestResponseContextHolder(request, response);
-
         try {
 
             if (!acquiresTokenRequestMatcher.matches(request)) {
@@ -90,18 +102,12 @@ public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
                 logger.debug("Request acquires verification token");
             }
 
-            try {
-                String tokenType = obtainTypeOfTokenAcquired(request);
-                VerificationService service = determineVerificationService(tokenType);
-                service.allocateAndWriteTokenFor(request);
-            }
-            catch (InternalTokenServiceException ie) {
-                logger.error(ie.getMessage());
-                failureHandler.onVerificationServiceFailure(request, response, ie);
-            }
-            catch (TokenServiceException e) {
-                failureHandler.onVerificationServiceFailure(request, response, e);
-            }
+            String tokenType    = obtainTypeOfTokenAcquired(request);
+            String business     = obtainBusinessFor(request);
+
+            VerificationRequest verificationRequest = new VerificationRequest(tokenType, business, request.getParameterMap());
+            VerificationRequestHandler handler = determineRequestHandler(verificationRequest);
+            handler.handle(verificationRequest, request, response);
 
         }
         finally {
@@ -110,22 +116,15 @@ public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
 
     }
 
+    private VerificationRequestHandler determineRequestHandler(VerificationRequest verificationRequest) {
 
-    private void initRequestResponseContextHolder(HttpServletRequest request, HttpServletResponse response) {
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response), false);
-    }
+        VerificationRequestHandler handler = tokenRequestHandlerMap.get(verificationRequest.getType());
 
-    private void resetRequestResponseContextHolder() {
-        RequestContextHolder.resetRequestAttributes();
-    }
-
-    private VerificationService determineVerificationService(String tokenType) {
-        for (VerificationService service : services) {
-            if (service.supports(tokenType)) {
-                return service;
-            }
+        if (handler == null) {
+            throw new TokenServiceException("no handler matched for token request: " + verificationRequest);
         }
-        throw new TokenServiceException("no service matched, token type '" + tokenType + "' is not supported!");
+
+        return handler;
     }
 
     /**
@@ -137,7 +136,7 @@ public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
         String tokenType = request.getParameter(tokenTypeParameter);
 
         if (tokenType == null) {
-            throw new TokenServiceException("token type not found");
+            throw new TokenServiceException("token type parameter not found");
         } else if (tokenType.isEmpty()) {
             throw new TokenServiceException("invalid token type: " + tokenType);
         }
@@ -145,7 +144,17 @@ public class VerificationTokenEndpointFilter extends OncePerRequestFilter {
         return tokenType;
     }
 
-    public void applyVerificationService(VerificationService service) {
-        services.add(Objects.requireNonNull(service));
+    private String obtainBusinessFor(HttpServletRequest request) {
+        String business = request.getParameter(businessParameter);
+        return StringUtils.isNotBlank(business) ? business : VerificationService.DEFAULT_BUSINESS;
     }
+
+    private static void initRequestResponseContextHolder(HttpServletRequest request, HttpServletResponse response) {
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response), false);
+    }
+
+    private static void resetRequestResponseContextHolder() {
+        RequestContextHolder.resetRequestAttributes();
+    }
+
 }

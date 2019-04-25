@@ -10,8 +10,27 @@ $(".login-tab li").click(function () {
 
 //~ 登录功能
 //===============================================================================
-
 // 表单登录
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29,7 +48,7 @@ function acquiresSmsCode(sender) {
         return;
     }
 
-    let url = "/verification.token?type=sms_code&to-mobile=" + mobile;
+    let url = "/verification.token?type=sms_code&mobile_phone=" + mobile;
     $.ajax({
         type: 'GET',
         url:url,
@@ -62,8 +81,11 @@ function limitAcquirement(sender) {
     countDown(sender);
 }
 
-// 第三方账号登录
 
+
+
+
+// 第三方登录
 
 
 

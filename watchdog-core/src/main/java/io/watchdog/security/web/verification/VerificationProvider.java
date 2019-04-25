@@ -1,6 +1,5 @@
 package io.watchdog.security.web.verification;
 
-import io.watchdog.security.verification.TokenService;
 import io.watchdog.security.verification.VerificationToken;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,24 +17,24 @@ import java.util.Objects;
 @Getter @Setter
 public class VerificationProvider<T extends VerificationToken> {
 
-    private static final String DEFAULT_TOKEN_PARAMETER = "verification-token";
+    private static final String DEFAULT_TOKEN_PARAMETER = "verification_token";
 
     private RequestMatcher requestMatcher;
     private String tokenParameter;
-    private TokenService<T> service;
+    private VerificationService<?, T> service;
     private VerificationSuccessHandler<T> successHandler;
     private VerificationFailureHandler failureHandler;
 
     @SuppressWarnings("unchecked")
     public VerificationProvider(RequestMatcher requestMatcher, String tokenParameter,
-                                TokenService<T> service,
+                                VerificationService<?, T> service,
                                 VerificationFailureHandler failureHandler) {
         this(requestMatcher, tokenParameter, service, new NonOpVerificationSuccessHandler(), failureHandler);
     }
 
 
     public VerificationProvider(RequestMatcher requestMatcher, String tokenParameter,
-                                TokenService<T> service,
+                                VerificationService<?, T> service,
                                 VerificationSuccessHandler<T> successHandler, VerificationFailureHandler failureHandler) {
 
         this.requestMatcher = Objects.requireNonNull(requestMatcher);

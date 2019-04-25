@@ -1,12 +1,21 @@
 package io.watchdog.security.web.authentication;
 
-public abstract class FormLoginAttemptsLimiter {
-    protected long warningThreshold;
-    protected long maximum;
+import lombok.Getter;
+import lombok.Setter;
 
-    public FormLoginAttemptsLimiter(long warningThreshold, long maximum) {
+import java.time.Duration;
+
+@Getter @Setter
+public abstract class FormLoginAttemptsLimiter {
+    private long warningThreshold;
+    private long maximum;
+    private Duration howLongWillLoginBeDisabled;
+
+    public FormLoginAttemptsLimiter(long warningThreshold, long maximum,
+                                    Duration howLongWillLoginBeDisabled) {
         this.warningThreshold = warningThreshold;
         this.maximum = maximum;
+        this.howLongWillLoginBeDisabled = howLongWillLoginBeDisabled;
     }
 
 
@@ -25,11 +34,17 @@ public abstract class FormLoginAttemptsLimiter {
 
 
     public Feedback recordFailure(Object details) {
-        long numberOfFailureTimes = incrementNumberOfTimes(details);
+        long numberOfFailureTimes = incrementNumberOfFailureTimes(details);
         return this.new Feedback(numberOfFailureTimes);
     }
 
-    protected abstract long incrementNumberOfTimes(Object details);
+    /**
+     * <p>增加并记录来自指定{IP, Username}的登录请求的失败次数
+     * <p>记得重置该记录的过期时间</p>
+     * @param details 来自哪个{IP, Username}的登录请求
+     * @return 自增后的总共的失败次数
+     */
+    protected abstract long incrementNumberOfFailureTimes(Object details);
 
 
 

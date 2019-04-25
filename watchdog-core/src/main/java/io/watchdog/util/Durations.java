@@ -2,6 +2,7 @@ package io.watchdog.util;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public abstract class Durations {
 
@@ -17,8 +18,12 @@ public abstract class Durations {
         }
     }
 
-    public static Duration fromNowToNextLocalTime(int hour, int minute, int second, int nanoOfSecond) {
-        return Duration.between(LocalDateTime.now(), LocalDateTimes.nextLocalTime(hour, minute, second, nanoOfSecond));
+    /**
+     * 获取现在到下一个指定时刻的时间间隔
+     * @param theMoment 到下一个几点几分几秒
+     */
+    public static Duration fromNowToNextLocalTime(LocalTime theMoment) {
+        return Duration.between(LocalDateTime.now(), LocalDateTimes.nextLocalTime(theMoment));
     }
 
 }

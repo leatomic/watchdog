@@ -1,11 +1,11 @@
 package io.watchdog.security.verification;
 
-import java.util.Map;
+import io.watchdog.security.web.verification.TokenRequest;
 
-public interface TokenService<T extends VerificationToken> {
+public interface TokenService<R extends TokenRequest, T extends VerificationToken> {
 
-    T allocate(Map<String, String[]> params);
+    T allocate(R request);
 
-    T verify(String key);
+    void verify(String presentedKey, T tokenSaved);
 
 }

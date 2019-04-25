@@ -17,11 +17,11 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
 
     private RequestMatcher formLoginProcessingRequestMatcher;
     private FormLoginAttemptsLimiter attemptsLimiter;
-    private FormLoginAttemptsLimitHandler attemptsLimitedHandler;
+    private FormLoginDisabledHandler attemptsLimitedHandler;
 
     public FormLoginAttemptsLimitFilter(RequestMatcher formLoginProcessingRequestMatcher,
                                         FormLoginAttemptsLimiter attemptsLimiter,
-                                        FormLoginAttemptsLimitHandler attemptsLimitedHandler) {
+                                        FormLoginDisabledHandler attemptsLimitedHandler) {
         this.formLoginProcessingRequestMatcher = formLoginProcessingRequestMatcher;
         this.attemptsLimiter = attemptsLimiter;
         this.attemptsLimitedHandler = attemptsLimitedHandler;
@@ -36,7 +36,7 @@ public class FormLoginAttemptsLimitFilter extends GenericFilterBean {
         if (formLoginProcessingRequestMatcher.matches(request)) {
             boolean allowed = attemptsLimiter.checkAttempt(new FormLoginDetails(request));
             if (!allowed) {
-                attemptsLimitedHandler.onAttemptsLimited(request, response);
+                attemptsLimitedHandler.onFormLoginDisabled(request, response);
                 return;
             }
         }

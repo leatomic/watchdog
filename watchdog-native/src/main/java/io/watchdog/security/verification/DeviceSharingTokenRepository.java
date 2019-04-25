@@ -1,5 +1,7 @@
 package io.watchdog.security.verification;
 
+import io.watchdog.security.web.verification.TokenRepository;
+
 public abstract class DeviceSharingTokenRepository<T extends VerificationToken> implements TokenRepository<T> {
 
     private String keyPrefix;

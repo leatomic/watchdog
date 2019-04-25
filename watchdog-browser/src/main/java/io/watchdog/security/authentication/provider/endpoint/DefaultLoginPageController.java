@@ -126,8 +126,8 @@ public class DefaultLoginPageController {
     private boolean smsCodeLoginEnabled;
     @Value("${watchdog.authentication.sms-code-login.verification.token-type}")
     private String smsCodeLoginVerificationTokenType;
-    @Value("${watchdog.authentication.sms-code-login.verification.mobile-parameter}")
-    private String smsCodeLoginVerificationMobileParameter;
+    @Value("${watchdog.authentication.sms-code-login.verification.mobile-phone-parameter}")
+    private String smsCodeLoginVerificationMobilePhoneParameter;
     @Value("${watchdog.authentication.sms-code-login.verification.token-parameter}")
     private String smsCodeLoginVerificationTokenParameter;
     @Value("${watchdog.authentication.sms-code-login.processing-url}")
@@ -140,7 +140,7 @@ public class DefaultLoginPageController {
             attributesMap.put("smsCodeLogin", smsCodeLogin);
 
             smsCodeLogin.smsCodeTokenTypeParameter = smsCodeLoginVerificationTokenType;
-            smsCodeLogin.toMobileParameter = smsCodeLoginVerificationMobileParameter;
+            smsCodeLogin.mobilePhoneParameter = smsCodeLoginVerificationMobilePhoneParameter;
             smsCodeLogin.smsCodeParameter = smsCodeLoginVerificationTokenParameter;
             smsCodeLogin.processingUrl = smsCodeLoginProcessingUrl;
         }
@@ -198,7 +198,7 @@ public class DefaultLoginPageController {
     @Getter @Setter
     static class SmsCodeLogin {
         String smsCodeTokenTypeParameter;
-        String toMobileParameter;
+        String mobilePhoneParameter;
         String smsCodeParameter;
         String processingUrl;
     }

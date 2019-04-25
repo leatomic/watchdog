@@ -1,7 +1,6 @@
 package io.watchdog.samples.provider.user_center.domain.member.repository.jpa;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.watchdog.samples.provider.user_center.domain.member.Gender;
+import io.watchdog.samples.provider.user_center.domain.member.Account;
 import io.watchdog.validation.MobilePhone;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,9 +22,9 @@ import java.util.Objects;
 @Table(
     name = "member_accounts",
     uniqueConstraints = {
-        @UniqueConstraint(name = AccountPO.ConstraintNames.UK_USERNAME, columnNames = "username"),
-        @UniqueConstraint(name = AccountPO.ConstraintNames.UK_PHONE,    columnNames = "phone"),
-        @UniqueConstraint(name = AccountPO.ConstraintNames.UK_EMAIL,    columnNames = "email")
+        @UniqueConstraint(name = AccountPO.ConstraintNames.UK_USERNAME,         columnNames = "username"),
+        @UniqueConstraint(name = AccountPO.ConstraintNames.UK_MOBILE_PHONE,     columnNames = "mobilePhone"),
+        @UniqueConstraint(name = AccountPO.ConstraintNames.UK_EMAIL,            columnNames = "email")
     }
 )
 @Getter @Setter @ToString
@@ -43,20 +42,20 @@ public class AccountPO implements Serializable {
     @Column(nullable = false)
     private String bio;
     @Column(nullable = false)
-    private Gender gender = Gender.PRIVATE;
+    private Account.Gender gender = Account.Gender.PRIVATE;
     @Column @Past
     private LocalDate birthday;
 
     @Column @MobilePhone
-    private String phone;
+    private String mobilePhone;
     @Column @Email
     private String email;
 
-    @Column(length = 72) @JsonIgnore
+    @Column(length = 72)
     private String password;
-    @Column @JsonIgnore
+    @Column
     private LocalDateTime passwordExpirationTime;
-    @Column @JsonIgnore
+    @Column
     private LocalDate passwordLastModified;
 
     @Column(name = "is_enabled")
@@ -84,9 +83,9 @@ public class AccountPO implements Serializable {
 
 
     public static class ConstraintNames {
-        public static final String UK_USERNAME  = "uk_username";
-        public static final String UK_PHONE     = "uk_phone";
-        public static final String UK_EMAIL     = "uk_email";
+        public static final String UK_USERNAME      = "uk_username";
+        public static final String UK_MOBILE_PHONE  = "uk_mobile_phone";
+        public static final String UK_EMAIL         = "uk_email";
     }
 
 }

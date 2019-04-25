@@ -54,13 +54,6 @@ public class SmsCodeLoginConfigurer<H extends HttpSecurityBuilder<H>>
     }
 
     @Override
-    public void init(H http) throws Exception {
-        super.init(http);
-    }
-
-
-
-    @Override
     public void configure(H http) throws Exception {
 
         super.configure(http);

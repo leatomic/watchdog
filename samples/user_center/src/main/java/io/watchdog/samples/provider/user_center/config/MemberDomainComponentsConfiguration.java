@@ -5,6 +5,7 @@ import io.watchdog.samples.provider.user_center.domain.member.repository.Account
 import io.watchdog.samples.provider.user_center.domain.member.repository.jpa.AccountJpaRepository;
 import io.watchdog.samples.provider.user_center.domain.member.repository.jpa.AccountPORepository;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,11 @@ public class MemberDomainComponentsConfiguration {
     @Bean
     protected AccountRepository accountRepository(AccountPORepository delegate, Account.Factory accountFactory) {
         return new AccountJpaRepository(delegate, accountFactory);
+    }
+
+    @Bean
+    public EmailValidator emailValidator() {
+        return new EmailValidator();
     }
 
 }

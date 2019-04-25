@@ -8,7 +8,7 @@ CREATE TABLE member_accounts (
   gender ENUM('PRIVATE', 'MALE', 'FEMALE') DEFAULT 'PRIVATE' COMMENT '性别',
   birthday DATE COMMENT '生日',
 
-  phone VARCHAR(11) COMMENT '绑定的手机号码',
+  mobile_phone VARCHAR(11) COMMENT '绑定的手机号码',
   email VARCHAR(255) COMMENT '绑定的邮箱',
 
   password VARCHAR(72) COMMENT '登录密码',
@@ -23,7 +23,7 @@ CREATE TABLE member_accounts (
 
   PRIMARY KEY (id),
   UNIQUE KEY uk_username(username),
-  UNIQUE KEY uk_phone(phone),
+  UNIQUE KEY uk_mobile_phone(mobile_phone),
   UNIQUE KEY uk_email(email)
 );
 

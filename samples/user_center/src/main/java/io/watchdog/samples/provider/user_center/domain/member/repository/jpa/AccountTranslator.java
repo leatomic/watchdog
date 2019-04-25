@@ -1,10 +1,10 @@
 package io.watchdog.samples.provider.user_center.domain.member.repository.jpa;
 
 import io.watchdog.samples.provider.user_center.domain.member.Account;
-import io.watchdog.samples.provider.user_center.domain.member.Associations;
-import io.watchdog.samples.provider.user_center.domain.member.Password;
-import io.watchdog.samples.provider.user_center.domain.member.Profile;
-import io.watchdog.samples.provider.user_center.infrastructure.repository.Translator;
+import io.watchdog.samples.provider.user_center.domain.member.Account.Associations;
+import io.watchdog.samples.provider.user_center.domain.member.Account.Password;
+import io.watchdog.samples.provider.user_center.domain.member.Account.Profile;
+import io.watchdog.samples.provider.user_center.infra.repository.Translator;
 
 public class AccountTranslator implements Translator<Account, AccountPO> {
 
@@ -18,7 +18,7 @@ public class AccountTranslator implements Translator<Account, AccountPO> {
         return accountFactory.create(
                 po.getId(), po.getUsername(),
                 new Profile(po.getAvatar(), po.getBio(), po.getGender(), po.getBirthday()),
-                new Associations(po.getPhone(), po.getEmail()),
+                new Associations(po.getMobilePhone(), po.getEmail()),
                 new Password(po.getPassword(), po.getPasswordExpirationTime(), po.getPasswordLastModified()),
                 po.isEnabled(), po.getExpirationTime(), po.isLocked(),
                 po.getRegistrationTime()
@@ -37,7 +37,7 @@ public class AccountTranslator implements Translator<Account, AccountPO> {
         po.setBirthday(profile.getBirthday());
 
         Associations associations = account.getAssociations();
-        po.setPhone(associations.getPhone());
+        po.setMobilePhone(associations.getMobilePhone());
         po.setEmail(associations.getEmail());
 
         Password password = account.getPassword();
@@ -57,7 +57,7 @@ public class AccountTranslator implements Translator<Account, AccountPO> {
             account,
             po.getId(), po.getUsername(),
             new Profile(po.getAvatar(), po.getBio(), po.getGender(), po.getBirthday()),
-            new Associations(po.getPhone(), po.getEmail()),
+            new Associations(po.getMobilePhone(), po.getEmail()),
             new Password(po.getPassword(), po.getPasswordExpirationTime(), po.getPasswordLastModified()),
             po.isEnabled(), po.getExpirationTime(), po.isLocked()
         );

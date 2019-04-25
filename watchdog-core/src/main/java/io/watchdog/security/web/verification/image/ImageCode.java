@@ -17,10 +17,4 @@ public class ImageCode extends VerificationToken {
         this.imageHeight = imageHeight;
     }
 
-    public ImageCode(String key, int seconds, int imageWidth, int imageHeight) {
-        super(key, seconds);
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
-    }
-
 }
