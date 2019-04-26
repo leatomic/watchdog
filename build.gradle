@@ -5,29 +5,30 @@ buildscript {
     dependencies {
         classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.8.RELEASE'
     }
-}
-
-ext {
-    javaVersion = JavaVersion.VERSION_1_8
-    lombokVersion = '1.18.6'
-    junitJupiterVersion = '5.2.0'
-}
-
-def javaLibraries = [project(':watchdog-core'), project(':watchdog-browser'), project(':watchdog-native'), 
-                     project(':watchdog-browser-starter-spring-boot')]
-def emptyProjects = [project(':samples')]
-def bootProjects = subprojects - javaLibraries - emptyProjects
-
-configure(javaLibraries) {
-    apply plugin: 'java-library'
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    compileJava {
-        options.encoding = 'UTF-8'
+    ext {
+        javaVersion = JavaVersion.VERSION_1_8
+        lombokVersion = '1.18.6'
+        junitJupiterVersion = '5.2.0'
     }
 }
 
-configure(bootProjects) {
+def javaLibraries   = [ project(':watchdog-core'), project(':watchdog-browser'), project(':watchdog-native'),
+                        project(':watchdog-browser-starter-spring-boot')
+                      ],
+    emptyProjects   = [ project(':samples') ],
+    bootProjects    = subprojects - javaLibraries - emptyProjects
+
+allprojects {
+    group = 'io.watchdog'
+    version = '1.0-SNAPSHOT'
+    apply plugin: 'idea'
+}
+
+configure(javaLibraries) {
+    apply plugin: 'java-library'
+}
+
+configure(bootProjects) {6
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     bootRun {
@@ -40,8 +41,23 @@ configure(bootProjects) {
 }
 
 configure(subprojects - emptyProjects) {
-    group = 'io.watchdog'
-    version = '1.0-SNAPSHOT'
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    compileJava {
+        options.encoding = 'UTF-8'
+    }
+    
+    
+    // requires to delegate IDEA build/run actions to Gradle
+    idea {
+        module {
+            sourceDirs += sourceSets.main.output.generatedSourcesDirs
+            generatedSourceDirs += sourceSets.main.output.generatedSourcesDirs
+            testSourceDirs += sourceSets.test.output.generatedSourcesDirs
+            generatedSourceDirs += sourceSets.test.output.generatedSourcesDirs
+        }
+    }
+
     apply plugin: "io.spring.dependency-management"
     afterEvaluate {
         repositories {
@@ -55,13 +71,12 @@ configure(subprojects - emptyProjects) {
         }
     }
     dependencies {
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
         
-        compileOnly "org.projectlombok:lombok:${this.lombokVersion}"
-        annotationProcessor "org.projectlombok:lombok:${this.lombokVersion}"
-        
-        testImplementation "org.junit.jupiter:junit-jupiter-api:${this.junitJupiterVersion}"
-        testImplementation "org.junit.jupiter:junit-jupiter-params:${this.junitJupiterVersion}"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${this.junitJupiterVersion}"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
         testImplementation ("org.springframework.boot:spring-boot-starter-test") {
             exclude module: 'junit'
         }
