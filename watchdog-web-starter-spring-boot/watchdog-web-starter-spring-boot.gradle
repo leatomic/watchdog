@@ -1,6 +1,6 @@
 dependencies {
     
-    api project(':watchdog-browser')
+    api project(':watchdog-web')
 
     compileOnly "org.springframework.boot:spring-boot-configuration-processor"
     

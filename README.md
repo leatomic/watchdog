@@ -12,7 +12,7 @@ Watchdog（看门狗）是一个用于在 `Spring Boot` 的基础上快速构建
 
 ```
 dependencies {
-    implementation project(':watchdog-browser-starter-spring-boot')
+    implementation project(':watchdog-web-starter-spring-boot')
 }
 ```
 
@@ -65,7 +65,7 @@ watchdog:
 
 
 
-#### watchdog-browser
+#### watchdog-web
 
 为构建针对 `Web App` 的服务提供的更多的支持，例如提供默认的登录页面（或者是前后端分离场景中的model）
 
