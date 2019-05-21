@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.watchdog.http.SimpleResponseBody;
 import io.watchdog.security.config.BeanIds;
 import io.watchdog.security.config.annotation.web.WatchdogWebSecurityConfigurerAdapter;
-import io.watchdog.security.verification.HttpSessionTokenRepository;
+import io.watchdog.security.web.verification.HttpSessionTokenRepository;
 import io.watchdog.security.verification.InternalTokenServiceException;
 import io.watchdog.security.verification.TokenServiceException;
 import io.watchdog.security.web.authentication.FormLoginAttemptsLimiter;

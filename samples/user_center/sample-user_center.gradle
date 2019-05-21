@@ -3,6 +3,7 @@ dependencies {
     implementation project(':watchdog-web-starter-spring-boot')
 
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//    implementation 'org.springframework.session:spring-session-data-redis'
 
     runtimeOnly 'com.h2database:h2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -10,7 +11,4 @@ dependencies {
     annotationProcessor     'com.querydsl:querydsl-apt:4.1.4:jpa'
     // needed because the QueryDSL annotation processor doesn't recognize javax.persistence.Entity
     annotationProcessor     'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 }

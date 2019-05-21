@@ -2,6 +2,9 @@ spring:
   profiles:
     active: dev
 
+
+
+
 ---
 spring.profiles: dev
 
@@ -17,16 +20,16 @@ spring:
     schema: classpath:schema.sql
     data: classpath:data.sql
     initialization-mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
     generate-ddl: false
     show-sql: true
     hibernate:
       ddl-auto: none
     open-in-view: false
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
 
   redis:
     host: 192.168.199.201
@@ -35,25 +38,28 @@ spring:
     timeout: PT5S
   data.redis.repositories.enabled: false
 
-  thymeleaf.cache: false
-
 watchdog:
   authentication:
     form-login:
-      attempts-limit:
-        enabled: true
+      enabled: true
+      attempts-limit.enabled: true
+    sms-code-login:
+      enabled: true
+
+
+
 
 ---
-#spring.profiles: prod
-#
-#server:
-#  port: 80
-#  error.whitelabel.enabled: false
-#
-#spring:
-#  datasource:
-#    driver-class-name: com.mysql.jdbc.Driver
-#    url: jdbc:mysql://192.168.199.205:3306/user-center?useSSL=false&useUnicode=yes&characterEncoding=UTF-8
-#    username: le
-#    password: 123456
-#  data.redis.repositories.enabled: false
+spring.profiles: prod
+
+server:
+  port: 80
+  error.whitelabel.enabled: false
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.199.205:3306/user-center?useSSL=false&useUnicode=yes&characterEncoding=UTF-8
+    username: le
+    password: 123456
+  data.redis.repositories.enabled: false

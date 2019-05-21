@@ -1,5 +1,0 @@
-dependencies {
-    implementation project(':watchdog-web-starter-spring-boot')
-}
-
-

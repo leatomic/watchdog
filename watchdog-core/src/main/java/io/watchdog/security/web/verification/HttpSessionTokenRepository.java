@@ -15,10 +15,9 @@
  *
  */
 
-package io.watchdog.security.verification;
+package io.watchdog.security.web.verification;
 
-import io.watchdog.security.web.verification.TokenRepository;
-import io.watchdog.security.web.verification.VerificationRequest;
+import io.watchdog.security.verification.VerificationToken;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
